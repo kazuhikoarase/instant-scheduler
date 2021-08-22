@@ -34,6 +34,11 @@ window.addEventListener('load', function() {
   titleTx.addEventListener('input', function() { update(); });
   document.body.appendChild(titleTx);
 
+  if (location.hash.length > 0) {
+    // recover from hash
+    titleTx.value = decodeURIComponent(location.hash.substring(1) );
+  }
+
   var qrCv = document.createElement('canvas');
   qrCv.setAttribute('id', 'qrCv');
   document.body.appendChild(qrCv);
@@ -269,6 +274,7 @@ window.addEventListener('load', function() {
     var lgap = height / 250;
 
     !function() {
+      location.href = '#' + encodeURIComponent(titleTx.value);
       titleTx.style.left = (gap - tbdr) + 'px';
       titleTx.style.top = gap + 'px';
       titleTx.style.padding = tpad + 'px';
