@@ -192,14 +192,18 @@ window.addEventListener('load', function() {
           lzpad(tmpDate.getDate(), 2) +
           lzpad(tmpDate.getHours(), 2) +
           lzpad(tmpDate.getMinutes(), 2);
-        if (sdate.substring(0, 4) != date.year) {
-          selections.year.error = true;
-        }
-        if (sdate.substring(4, 8) != date.md) {
-          selections.md.error = true;
-        }
-        if (sdate.substring(8, 12) != date[prop]) {
+        var error = false;
+        if (!error  && sdate.substring(8, 12) != date[prop]) {
           selections[prop].error = true;
+          error = true;
+        }
+        if (!error  && sdate.substring(4, 8) != date.md) {
+          selections.md.error = true;
+          error = true;
+        }
+        if (!error  && sdate.substring(0, 4) != date.year) {
+          selections.year.error = true;
+          error = true;
         }
         return sdate;
       };
@@ -225,7 +229,7 @@ window.addEventListener('load', function() {
       ctx.clearRect(0, 0, width, height);
 
       ctx.strokeStyle = '#00f';
-      ctx.fillStyle = '#ffeedd';
+      ctx.fillStyle = 'rgba(64,0,0,0.1)';
       ctx.fillRect(0, 0, width, height);
       /*
       ctx.beginPath();
@@ -343,7 +347,7 @@ window.addEventListener('load', function() {
         elm.style.backgroundColor =
           error? 'rgba(255,0,0,0.2)' : 'rgba(0,0,0,0.1)';
         elm.style.border = lbdr + 'px solid ' +
-          (selected? 'rgba(0,0,0,0.6)':  'rgba(0,0,0,0)');
+          (selected? 'rgba(64,0,0,0.3)':  'rgba(0,0,0,0)');
         elm.style.borderRadius = lbdr * 2 + 'px';
       };
 
