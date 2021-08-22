@@ -1,3 +1,15 @@
+//---------------------------------------------------------------------
+// instant-scheduler
+//
+// Copyright (c) 2021 Kazuhiko Arase
+//
+// URL: https://github.com/kazuhikoarase/instant-scheduler
+//
+// Licensed under the MIT license:
+//  http://www.opensource.org/licenses/mit-license.php
+//
+//---------------------------------------------------------------------
+
 'use strict';
 
 window.addEventListener('load', function() {
