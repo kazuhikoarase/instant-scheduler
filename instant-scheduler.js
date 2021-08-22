@@ -17,9 +17,16 @@ window.addEventListener('load', function() {
         UNTITLED_SCHEDULE: '無題の予定'
       }
     };
-    var lang = navigator.language.toLowerCase().replace(/^([a-z]+).*$/, '$1');
+    var lang = navigator.language.toLowerCase().
+      replace(/^([a-z]+).*$/, '$1');
     return messages[lang] || messages.en;
   }();
+
+  var keyColor = { r: 211, g: 127, b: 0 };
+  keyColor.rgba = function(a) {
+    return 'rgba(' + keyColor.r + ',' + keyColor.g + ',' +
+      keyColor.b + ',' + a + ')';
+  };
 
   qrcode.stringToBytes = qrcode.stringToBytesFuncs['UTF-8'];
 
@@ -237,7 +244,7 @@ window.addEventListener('load', function() {
       ctx.clearRect(0, 0, width, height);
 
       ctx.strokeStyle = '#00f';
-      ctx.fillStyle = 'rgba(64,0,0,0.1)';
+      ctx.fillStyle = keyColor.rgba(0.1);
       ctx.fillRect(0, 0, width, height);
       /*
       ctx.beginPath();
@@ -353,10 +360,10 @@ window.addEventListener('load', function() {
         elm.style.top = top + 'px';
         elm.style.width = (tw * width + lgap * 2) + 'px';
         elm.style.height = (th * height + lgap * 2) + 'px';
-        elm.style.backgroundColor =
-          error? 'rgba(255,0,0,0.2)' : 'rgba(0,0,0,0.1)';
-        elm.style.border = lbdr + 'px solid ' +
-          (selected? 'rgba(64,0,0,0.3)':  'rgba(0,0,0,0)');
+        elm.style.backgroundColor = error?
+          'rgba(255,0,0,0.2)' : 'rgba(0,0,0,0.1)';
+        elm.style.border = lbdr + 'px solid ' + (selected?
+          keyColor.rgba(0.3) : 'rgba(0,0,0,0)');
         elm.style.borderRadius = lbdr * 2 + 'px';
       };
 
