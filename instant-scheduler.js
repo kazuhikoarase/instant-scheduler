@@ -410,8 +410,9 @@ window.addEventListener('load', function() {
       qr.addData(vData, 'Byte');
       qr.make();
       var modCount = qr.getModuleCount();
-      var quiet = 4;
-      var qsize = modCount + quiet * 2;
+      var msize = 2;
+      var quiet = msize * 4;
+      var qsize = modCount * msize + quiet * 2;
       qrCv.width = qsize;
       qrCv.height = qsize;
       var qrCtx = qrCv.getContext('2d');
@@ -422,7 +423,7 @@ window.addEventListener('load', function() {
       for (var r = 0; r < modCount; r += 1) {
         for (var c = 0; c < modCount; c += 1) {
           if (qr.isDark(r, c) ) {
-            qrCtx.fillRect(c + quiet, r + quiet, 1, 1);
+            qrCtx.fillRect(c * msize + quiet, r * msize + quiet, msize, msize);
           }
         }
       }
