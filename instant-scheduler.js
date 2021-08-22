@@ -2,6 +2,10 @@
 
 window.addEventListener('load', function() {
 
+  document.addEventListener('touchstart', function(event) {
+    event.preventDefault();
+  });
+
   var messages = function() {
     var messages = {
       en: {
