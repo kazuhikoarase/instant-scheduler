@@ -153,13 +153,12 @@ window.addEventListener('load', function() {
     } else {
       return;
     }
-    if (48 <= event.keyCode && event.keyCode <= 57) {
-      var lbl = String.fromCharCode(event.keyCode);
-      var s = date[currentSel.prop] + lbl;
+    if (event.key.match(/^[0-9]$/) ) {
+      var s = date[currentSel.prop] + event.key;
       s = s.substring(s.length - currentSel.length);
       date[currentSel.prop] = s;
       update();
-    } else if (event.keyCode == 9) {
+    } else if (event.key == 'Tab') {
       var selectedIndex = -1;
       focusable.forEach(function(sel, i) {
         if (currentSel == sel) {
@@ -289,7 +288,7 @@ window.addEventListener('load', function() {
       var marginTop = (height - ( (bs + gap) * rows - gap) ) - gap;
 
       eachButtons(function(r, c, i) {
-            
+
         var button = buttons[i];
         var left = marginLeft + c * (bs + gap);
         var top = marginTop + r * (bs + gap);
