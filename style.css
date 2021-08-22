@@ -1,0 +1,70 @@
+
+* {
+  font-family: arial, sans-serif;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  -webkit-user-select: none;
+}
+
+#titleTx {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  margin: 0px;
+  padding: 0px;
+  vertical-align: middle;
+  outline: none;
+}
+
+#qrCv {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  margin: 0px;
+  padding: 0px;
+  image-rendering: pixelated;
+}
+
+#cv {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+}
+
+.txt {
+  position: absolute;
+  display: inline-block;  
+  overflow: visible;
+  margin: 0px;
+  padding: 0px;
+  text-align: center;
+  line-height: 1;
+}
+
+.sel {
+  position: absolute;
+  display: inline-block;  
+  overflow: visible;
+  margin: 0px;
+  padding: 0px;
+}
+
+.btn {
+  position: absolute;
+  display: inline-block;
+  overflow: visible;
+  margin: 0px;
+  padding: 0px;
+  background-color: #fff;
+  text-align: center;
+  border-style: none;
+  outline: none;
+}
+
+.btn:active {
+  background-color: #ddd;
+}
