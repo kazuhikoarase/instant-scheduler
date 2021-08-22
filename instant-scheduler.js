@@ -2,14 +2,12 @@
 
 window.addEventListener('load', function() {
 
-  !function() {
-    var cancelHandler = function(event) {
-      event.preventDefault();
-      event.stopPropagation();
-    };
-    document.addEventListener('touchstart', cancelHandler);
-    document.addEventListener('touchmove', cancelHandler);
-  }();
+  document.addEventListener('touchstart', function(event) {
+    event.preventDefault();
+  });
+  document.addEventListener('touchmove', function(event) {
+    event.preventDefault();
+  }, false);
 
   var messages = function() {
     var messages = {
