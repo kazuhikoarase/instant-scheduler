@@ -39,6 +39,14 @@ window.addEventListener('load', function() {
 
   qrcode.stringToBytes = qrcode.stringToBytesFuncs['UTF-8'];
 
+  var lzpad = function(n, digits) {
+    var s = '' + n;
+    while (s.length < digits) {
+      s = '0' + s;
+    }
+    return s;
+  };
+
   var ctx = document.createElement('canvas').getContext('2d');
   ctx.canvas.setAttribute('id', 'cv');
   document.body.appendChild(ctx.canvas);
@@ -79,130 +87,57 @@ window.addEventListener('load', function() {
     texts.push(text);
   });
 
-  var createSelection = function(prop, length) {
-    var elm = document.createElement('span');
-    elm.setAttribute('class', 'sel');
-    elm.addEventListener('click', function() {
-      currentSel = sel;
-      update();
-    });
-    document.body.appendChild(elm);
-    var sel = { $el: elm, prop: prop, length: length, error: false };
-    selections[prop] = sel;
-  };
-  var selections = {};
-  createSelection('year', 4);
-  createSelection('md', 4);
-  createSelection('sTime', 4);
-  createSelection('eTime', 4);
-  var currentSel = selections.md;
-
-  var focusable = [
-    selections.year,
-    selections.md,
-    selections.sTime,
-    selections.eTime
-  ];
-
-  var lzpad = function(n, digits) {
-    var s = '' + n;
-    while (s.length < digits) {
-      s = '0' + s;
-    }
-    return s;
-  };
-
-  var date = function() {
-    var date = new Date();
-    return {
-      year: lzpad(date.getFullYear(), 4),
-      md: lzpad(date.getMonth() + 1, 2) + lzpad(date.getDate(), 2),
-      sTime: '1000',
-      eTime: '1100'
+  var schedule = function() {
+    var createSelection = function(prop, length) {
+      var elm = document.createElement('span');
+      elm.setAttribute('class', 'sel');
+      elm.addEventListener('click', function() {
+        setCurrentSel(sel);
+      });
+      document.body.appendChild(elm);
+      var sel = { $el: elm, prop: prop, length: length, error: false };
+      selections[prop] = sel;
     };
-  }();
-
-  var getDisplayString = function() {
+    var selections = {};
+    createSelection('year', 4);
+    createSelection('md', 4);
+    createSelection('sTime', 4);
+    createSelection('eTime', 4);
+    var focusable = [
+      selections.year,
+      selections.md,
+      selections.sTime,
+      selections.eTime
+    ];
+    var date = function() {
+      var date = new Date();
+      return {
+        year: lzpad(date.getFullYear(), 4),
+        md: lzpad(date.getMonth() + 1, 2) + lzpad(date.getDate(), 2),
+        sTime: '1000',
+        eTime: '1100'
+      };
+    }();
+    var model = {
+      currentSel: selections.md
+    };
+    var getDisplayString = function() {
     return date.year + '/' +
       date.md.substring(0, 2) + '/' + date.md.substring(2, 4) + ' ' +
       date.sTime.substring(0, 2) + ':' + date.sTime.substring(2, 4) + '-' +
       date.eTime.substring(0, 2) + ':' + date.eTime.substring(2, 4);
-  };
-
-  var rows = 4;
-  var cols = 3;
-  var buttonSettings = [
-    { label: '1', size: 1 },
-    { label: '2', size: 1 },
-    { label: '3', size: 1 },
-    { label: '4', size: 1 },
-    { label: '5', size: 1 },
-    { label: '6', size: 1 },
-    { label: '7', size: 1 },
-    { label: '8', size: 1 },
-    { label: '9', size: 1 },
-    { label: '', size: 1 },
-    { label: '0', size: 1 },
-    { label: '', size: 1 }
-  ];
-  var buttons = [];
-  var eachButtons = function(cb) {
-    var i = 0;
-    for (var r = 0; r < rows; r += 1) {
-      for (var c = 0; c < cols; c += 1) {
-        cb(r, c, i);
-        i += 1;
-      }
-    }
-  };
-  eachButtons(function(r, c, i) {
-    var button = document.createElement('button');
-    button.setAttribute('class', 'btn');
-    button.textContent = r + 'x' + c;
-    button.addEventListener('click', function(event) {
-      var s = date[currentSel.prop] + buttonSettings[i].label;
-      s = s.substring(s.length - currentSel.length);
-      date[currentSel.prop] = s;
+    };
+    var setCurrentSel = function(currentSel) {
+      model.currentSel = currentSel;
       update();
-    });
-    document.body.appendChild(button);
-    buttons.push(button);
-  });
-  document.addEventListener('keydown', function(event) {
-    if (event.target != titleTx) {
-      event.preventDefault();
-    } else {
-      return;
-    }
-    if (event.key.match(/^[0-9]$/) ) {
-      var s = date[currentSel.prop] + event.key;
-      s = s.substring(s.length - currentSel.length);
-      date[currentSel.prop] = s;
+    };
+    var putDigit = function(d) {
+      var s = date[model.currentSel.prop] + d;
+      s = s.substring(s.length - model.currentSel.length);
+      date[model.currentSel.prop] = s;
       update();
-    } else if (event.key == 'Tab') {
-      var selectedIndex = -1;
-      focusable.forEach(function(sel, i) {
-        if (currentSel == sel) {
-          selectedIndex = i;
-        }
-      });
-      if (selectedIndex != -1) {
-        if (event.shiftKey) {
-          selectedIndex =
-            (selectedIndex + focusable.length - 1) % focusable.length;
-        } else {
-          selectedIndex = (selectedIndex + 1) % focusable.length;
-        }
-        currentSel = focusable[selectedIndex];
-        update();
-      }
-    }
-  });
-
-  var doLayout = function(width, height) {
-
-    !function() {
-
+    };
+    var validate = function() {
       // validation
       var valDate = function(prop) {
         var tmpDate = new Date(0);
@@ -244,219 +179,305 @@ window.addEventListener('load', function() {
       if (dTime < sTime) {
         selections.eTime.error = true;
       }
-    }();
-
-    !function() {
-      // debug-bg
-      ctx.canvas.width = width;
-      ctx.canvas.height = height;
-      ctx.clearRect(0, 0, width, height);
-
-      ctx.strokeStyle = '#00f';
-      ctx.fillStyle = keyColor1;
-      ctx.fillRect(0, 0, width, height);
-      /*
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.lineTo(width, height);
-      ctx.moveTo(width, 0);
-      ctx.lineTo(0, height);
-      ctx.stroke();
-      */
-      
-    }();
-
-    var hDbgLine = function(y, color) {
-      ctx.strokeStyle = color || '#f00';
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(width / 2, y);
-      ctx.stroke();
     };
-    var vDbgLine = function(x, color) {
-      ctx.strokeStyle = color || '#f00';
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, height / 2);
-      ctx.stroke();
-    };
+    var layout = function(width, height) {
 
-    var std = Math.min(width, height);
-    var gap = ~~(std / 50);
+      validate();
 
-    var tbdr = height / 200;
-    var tpad = height / 100;
-    var lbdr = height / 160;
-    var lgap = height / 250;
+      !function() {
 
-    !function() {
-      location.href = '#' + encodeURIComponent(titleTx.value);
-      titleTx.style.left = (gap - tbdr) + 'px';
-      titleTx.style.top = gap + 'px';
-      titleTx.style.padding = tpad + 'px';
-      titleTx.style.fontSize = (height / 25) + 'px';
-      titleTx.style.width = (width - tpad * 2 - gap * 2) + 'px';
-      titleTx.style.border = tbdr + 'px solid ' + keyColor2;
-      titleTx.style.borderRadius = (height  / 120) + 'px';
-    }();
+        ctx.canvas.width = width;
+        ctx.canvas.height = height;
+        ctx.clearRect(0, 0, width, height);
 
-    var ttop = 0;
-    var btop = 0;
+        ctx.strokeStyle = '#00f';
+        ctx.fillStyle = keyColor1;
+        ctx.fillRect(0, 0, width, height);
+        /*
+        // debug-bg
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(width, height);
+        ctx.moveTo(width, 0);
+        ctx.lineTo(0, height);
+        ctx.stroke();
+        */
 
-    !function() {
+      }();
 
-      var bs = ( (height + gap) / 8 - gap);
-      var marginLeft = (width - ( (bs + gap) * cols - gap) ) / 2;
-      var marginTop = (height - ( (bs + gap) * rows - gap) ) - gap;
 
-      eachButtons(function(r, c, i) {
+      var std = Math.min(width, height);
+      var gap = ~~(std / 50);
 
-        var button = buttons[i];
-        var left = marginLeft + c * (bs + gap);
-        var top = marginTop + r * (bs + gap);
+      var tbdr = height / 200;
+      var tpad = height / 100;
+      var lbdr = height / 160;
+      var lgap = height / 250;
 
-        if (i == 0) {
-          btop = top - gap;
-        }
+      !function() {
+        location.href = '#' + encodeURIComponent(titleTx.value);
+        titleTx.style.left = (gap - tbdr) + 'px';
+        titleTx.style.top = gap + 'px';
+        titleTx.style.padding = tpad + 'px';
+        titleTx.style.fontSize = (height / 25) + 'px';
+        titleTx.style.width = (width - tpad * 2 - gap * 2) + 'px';
+        titleTx.style.border = tbdr + 'px solid ' + keyColor2;
+        titleTx.style.borderRadius = (height  / 120) + 'px';
+      }();
 
-        button.style.left = left + 'px';
-        button.style.top = top + 'px';
-        button.style.width = bs + 'px';
-        button.style.height = bs + 'px';
-        button.style.borderRadius = (bs / 2) + 'px';
-        button.style.fontSize = (height / 16 * buttonSettings[i].size) + 'px';
-        button.style.display = buttonSettings[i].label? '' : 'none';
-        button.textContent = buttonSettings[i].label;
-      });
-    }();
+      var ttop = 0;
+      var btop = 0;
 
-    var s = getDisplayString();
-    !function() {
- 
-      var hgap = 0;
-      var vgap = std / 30;
-      var th = (height + hgap) / 14 - hgap;
-      var tw = th / 2;
+      !function() {
 
-      var marginLeft = (width - ( (tw + hgap) * tcols - hgap) ) / 2;
-      var marginTop = (btop - ( (th + vgap) * trows - vgap) );
+        var bs = ( (height + gap) / 8 - gap);
+        var marginLeft = (width - ( (bs + gap) * cols - gap) ) / 2;
+        var marginTop = (height - ( (bs + gap) * rows - gap) ) - gap;
 
-      eachTexts(function(r, c, i) {
+        eachButtons(function(r, c, i) {
 
-        var text = texts[i];
-        var left = marginLeft + c * (tw + hgap);
-        var top = marginTop + r * (th + vgap);
+          var button = buttons[i];
+          var left = marginLeft + c * (bs + gap);
+          var top = marginTop + r * (bs + gap);
 
-        if (i == 0) {
-          ttop = top;
-        }
+          if (i == 0) {
+            btop = top - gap;
+          }
 
-        text.style.left = left + 'px';
-        text.style.top = top + 'px';
-        text.style.width = tw + 'px';
-        text.style.height = th + 'px';
-        text.style.fontSize = th + 'px';
-        text.textContent =  s.charAt(i);
-      });
+          button.style.left = left + 'px';
+          button.style.top = top + 'px';
+          button.style.width = bs + 'px';
+          button.style.height = bs + 'px';
+          button.style.borderRadius = (bs / 2) + 'px';
+          button.style.fontSize = (height / 16 * buttonSettings[i].size) + 'px';
+        });
+      }();
 
-      var layoutSelection = function(sel, x, y, width, height) {
-        var selected = currentSel == sel;
-        var error = sel.error;
-        var elm = sel.$el;
-        var left = marginLeft + x * (tw + hgap) - lbdr - lgap;
-        var top = marginTop + y * (th + vgap) - lbdr - lgap;
-        elm.style.left = left + 'px';
-        elm.style.top = top + 'px';
-        elm.style.width = (tw * width + lgap * 2) + 'px';
-        elm.style.height = (th * height + lgap * 2) + 'px';
-        elm.style.backgroundColor = error?
-          'rgba(255,0,0,0.2)' : 'rgba(0,0,0,0.1)';
-        elm.style.border = lbdr + 'px solid ' + (selected?
-          keyColor2 : 'rgba(0,0,0,0)');
-        elm.style.borderRadius = lbdr * 2 + 'px';
-      };
+      var s = schedule.getDisplayString();
+      !function() {
 
-      layoutSelection(selections.year, 0, 0, 4, 1);
-      layoutSelection(selections.md, 5, 0, 5, 1);
-      layoutSelection(selections.sTime, 0, 1, 5, 1);
-      layoutSelection(selections.eTime, 6, 1, 5, 1);
+        var hgap = 0;
+        var vgap = std / 30;
+        var th = (height + hgap) / 14 - hgap;
+        var tw = th / 2;
 
-    }();
+        var marginLeft = (width - ( (tw + hgap) * tcols - hgap) ) / 2;
+        var marginTop = (btop - ( (th + vgap) * trows - vgap) );
 
-    !function() {
+        eachTexts(function(r, c, i) {
 
-      for (var sel in selections) {
-        if (selections[sel].error) {
-          qrCv.style.display = 'none';
-          return;
-        }
-      }
-      qrCv.style.display = '';
+          var text = texts[i];
+          var left = marginLeft + c * (tw + hgap);
+          var top = marginTop + r * (th + vgap);
 
-      var vData = '';
-      var appendVData = function(line) {
-        vData += line + '\r\n';
-      };
+          if (i == 0) {
+            ttop = top;
+          }
 
-      var now = new Date();
-      appendVData('BEGIN:VCALENDAR');
-      appendVData('VERSION:2.0');
-      appendVData('BEGIN:VEVENT');
-      appendVData('DTSTAMP:' +
-        lzpad(now.getFullYear(), 4) +
-        lzpad(now.getMonth() + 1, 2) +
-        lzpad(now.getDate(), 2) + 'T000000');
-      appendVData('DTSTART:' +
-        date.year + date.md + 'T' + date.sTime + '00');
-      appendVData('DTEND:' +
-        date.year + date.md + 'T' + date.eTime + '00');
-      appendVData('SUMMARY:' +
-        (titleTx.value || messages.UNTITLED_SCHEDULE) );
-      appendVData('END:VEVENT');
-      appendVData('END:VCALENDAR');
+          text.style.left = left + 'px';
+          text.style.top = top + 'px';
+          text.style.width = tw + 'px';
+          text.style.height = th + 'px';
+          text.style.fontSize = th + 'px';
+          text.textContent =  s.charAt(i);
+        });
 
-      var qr = qrcode(0, 'L');
-      qr.addData(vData, 'Byte');
-      qr.make();
-      var modCount = qr.getModuleCount();
-      var msize = 2;
-      var quiet = msize * 4;
-      var qsize = modCount * msize + quiet * 2;
-      qrCv.width = qsize;
-      qrCv.height = qsize;
-      var qrCtx = qrCv.getContext('2d');
-      qrCtx.clearRect(0, 0, qrCv.width, qrCv.height);
-      qrCtx.fillStyle = '#fff';
-      qrCtx.fillRect(0, 0, qrCv.width, qrCv.height);
-      qrCtx.fillStyle = '#000';
-      for (var r = 0; r < modCount; r += 1) {
-        for (var c = 0; c < modCount; c += 1) {
-          if (qr.isDark(r, c) ) {
-            qrCtx.fillRect(c * msize + quiet, r * msize + quiet, msize, msize);
+        var layoutSelection = function(sel, x, y, width, height) {
+          var selected = model.currentSel == sel;
+          var error = sel.error;
+          var elm = sel.$el;
+          var left = marginLeft + x * (tw + hgap) - lbdr - lgap;
+          var top = marginTop + y * (th + vgap) - lbdr - lgap;
+          elm.style.left = left + 'px';
+          elm.style.top = top + 'px';
+          elm.style.width = (tw * width + lgap * 2) + 'px';
+          elm.style.height = (th * height + lgap * 2) + 'px';
+          elm.style.backgroundColor = error?
+            'rgba(255,0,0,0.2)' : 'rgba(0,0,0,0.1)';
+          elm.style.border = lbdr + 'px solid ' + (selected?
+            keyColor2 : 'rgba(0,0,0,0)');
+          elm.style.borderRadius = lbdr * 2 + 'px';
+        };
+
+        layoutSelection(selections.year, 0, 0, 4, 1);
+        layoutSelection(selections.md, 5, 0, 5, 1);
+        layoutSelection(selections.sTime, 0, 1, 5, 1);
+        layoutSelection(selections.eTime, 6, 1, 5, 1);
+
+      }();
+      !function() {
+  
+        for (var sel in selections) {
+          if (selections[sel].error) {
+            qrCv.style.display = 'none';
+            return;
           }
         }
+        qrCv.style.display = '';
+  
+        var vData = '';
+        var appendVData = function(line) {
+          vData += line + '\r\n';
+        };
+  
+        var now = new Date();
+        appendVData('BEGIN:VCALENDAR');
+        appendVData('VERSION:2.0');
+        appendVData('BEGIN:VEVENT');
+        appendVData('DTSTAMP:' +
+          lzpad(now.getFullYear(), 4) +
+          lzpad(now.getMonth() + 1, 2) +
+          lzpad(now.getDate(), 2) + 'T000000');
+        appendVData('DTSTART:' +
+          date.year + date.md + 'T' + date.sTime + '00');
+        appendVData('DTEND:' +
+          date.year + date.md + 'T' + date.eTime + '00');
+        appendVData('SUMMARY:' +
+          (titleTx.value || messages.UNTITLED_SCHEDULE) );
+        appendVData('END:VEVENT');
+        appendVData('END:VCALENDAR');
+  
+        var qr = qrcode(0, 'L');
+        qr.addData(vData, 'Byte');
+        qr.make();
+        var modCount = qr.getModuleCount();
+        var msize = 2;
+        var quiet = msize * 4;
+        var qsize = modCount * msize + quiet * 2;
+        qrCv.width = qsize;
+        qrCv.height = qsize;
+        var qrCtx = qrCv.getContext('2d');
+        qrCtx.clearRect(0, 0, qrCv.width, qrCv.height);
+        qrCtx.fillStyle = '#fff';
+        qrCtx.fillRect(0, 0, qrCv.width, qrCv.height);
+        qrCtx.fillStyle = '#000';
+        for (var r = 0; r < modCount; r += 1) {
+          for (var c = 0; c < modCount; c += 1) {
+            if (qr.isDark(r, c) ) {
+              qrCtx.fillRect(c * msize + quiet, r * msize + quiet, msize, msize);
+            }
+          }
+        }
+  
+        var translate = function(left, top) {
+          return 'translate(' + left + 'px,' + top + 'px)';
+        };
+  
+        var left = width / 2;
+        var top = gap + titleTx.offsetHeight;
+        var scale = (ttop - lbdr - top) / qsize * 0.9;
+  
+        //hDbgLine(top, 'orange');
+        //hDbgLine(ttop - lbdr - lgap, 'blue');
+  
+        var tran = '';
+        tran += translate(-qsize / 2, -qsize / 2);
+        tran += 'scale(' + scale + ')';
+        tran += translate(qsize / 2, qsize / 2);
+        tran += translate(left / scale - qsize / 2,
+          (ttop - lbdr - lgap + top) / 2 / scale - qsize / 2);
+  
+        qrCv.style.transform = tran;
+      }();
+    };
+    var nextSel = function(prev) {
+      var selectedIndex = -1;
+      focusable.forEach(function(sel, i) {
+        if (model.currentSel == sel) {
+          selectedIndex = i;
+        }
+      });
+      if (selectedIndex != -1) {
+        if (prev) {
+          selectedIndex = (selectedIndex + focusable.length - 1) %
+              focusable.length;
+        } else {
+          selectedIndex = (selectedIndex + 1) % focusable.length;
+        }
+        setCurrentSel(focusable[selectedIndex]);
       }
 
-      var translate = function(left, top) {
-        return 'translate(' + left + 'px,' + top + 'px)';
-      };
+    };
 
-      var left = width / 2;
-      var top = gap + titleTx.offsetHeight;
-      var scale = (ttop - lbdr - top) / qsize * 0.9;
+    return {
+      selections: selections,
+      getDisplayString: getDisplayString,
+      setCurrentSel: setCurrentSel,
+      putDigit: putDigit,
+      validate: validate,
+      layout: layout,
+      nextSel: nextSel
+    };
+  }();
 
-      //hDbgLine(top, 'orange');
-      //hDbgLine(ttop - lbdr - lgap, 'blue');
+  var rows = 4;
+  var cols = 3;
+  var buttonSettings = [
+    { label: '1', size: 1 },
+    { label: '2', size: 1 },
+    { label: '3', size: 1 },
+    { label: '4', size: 1 },
+    { label: '5', size: 1 },
+    { label: '6', size: 1 },
+    { label: '7', size: 1 },
+    { label: '8', size: 1 },
+    { label: '9', size: 1 },
+    { label: '', size: 1 },
+    { label: '0', size: 1 },
+    { label: '', size: 1 }
+  ];
+  var buttons = [];
+  var eachButtons = function(cb) {
+    var i = 0;
+    for (var r = 0; r < rows; r += 1) {
+      for (var c = 0; c < cols; c += 1) {
+        cb(r, c, i);
+        i += 1;
+      }
+    }
+  };
+  eachButtons(function(r, c, i) {
+    var button = document.createElement('button');
+    button.setAttribute('class', 'btn');
+    button.textContent = buttonSettings[i].label;
+    button.style.display = buttonSettings[i].label? '' : 'none';
+    button.addEventListener('click', function(event) {
+      schedule.putDigit(buttonSettings[i].label);
+    });
+    document.body.appendChild(button);
+    buttons.push(button);
+  });
 
-      var tran = '';
-      tran += translate(-qsize / 2, -qsize / 2);
-      tran += 'scale(' + scale + ')';
-      tran += translate(qsize / 2, qsize / 2);
-      tran += translate(left / scale - qsize / 2,
-        (ttop - lbdr - lgap + top) / 2 / scale - qsize / 2);
+  document.addEventListener('keydown', function(event) {
+    if (event.target != titleTx) {
+      event.preventDefault();
+    } else {
+      return;
+    }
+    if (event.key.match(/^[0-9]$/) ) {
+      schedule.putDigit(event.key);
+    } else if (event.key == 'Tab') {
+      schedule.nextSel(event.shiftKey);
+    }
+  });
 
-      qrCv.style.transform = tran;
-    }();
+  var hDbgLine = function(y, color) {
+    ctx.strokeStyle = color || '#f00';
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(width / 2, y);
+    ctx.stroke();
+  };
+  var vDbgLine = function(x, color) {
+    ctx.strokeStyle = color || '#f00';
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, height / 2);
+    ctx.stroke();
+  };
+
+  var doLayout = function(width, height) {
+    schedule.layout(width, height);
   };
 
   var update = function() {
