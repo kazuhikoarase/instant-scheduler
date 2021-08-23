@@ -59,7 +59,7 @@ window.addEventListener('load', function() {
   document.body.appendChild(titleTx);
 
   if (location.hash.length > 0) {
-    // recover from hash
+    // restore from hash
     titleTx.value = decodeURIComponent(location.hash.substring(1) );
   }
 
@@ -67,25 +67,80 @@ window.addEventListener('load', function() {
   qrCv.setAttribute('id', 'qrCv');
   document.body.appendChild(qrCv);
 
-  var trows = 2;
-  var tcols = 11;
-  var texts = [];
-  var eachTexts = function(cb) {
-    var i = 0;
-    for (var r = 0; r < trows; r += 1) {
-      for (var c = 0; c < tcols; c += 1) {
-        cb(r, c, i);
-        i += 1;
+  var texts = function() {
+    var rows = 2;
+    var cols = 11;
+    var texts = [];
+    var each = function(cb) {
+      var i = 0;
+      for (var r = 0; r < rows; r += 1) {
+        for (var c = 0; c < cols; c += 1) {
+          cb(r, c, i);
+          i += 1;
+        }
       }
-    }
-  };
-  eachTexts(function(r, c) {
-    var text = document.createElement('span');
-    text.setAttribute('class', 'txt');
-    text.textContent = r + 'x' + c;
-    document.body.appendChild(text);
-    texts.push(text);
-  });
+    };
+    each(function(r, c) {
+      var text = document.createElement('span');
+      text.setAttribute('class', 'txt');
+      text.textContent = r + 'x' + c;
+      document.body.appendChild(text);
+      texts.push(text);
+    });
+    texts.rows = rows;
+    texts.cols = cols;
+    texts.each = each;
+    return texts;
+  }();
+
+  var buttons = function() {
+
+    var buttonSettings = [
+      { label: '1', size: 1 },
+      { label: '2', size: 1 },
+      { label: '3', size: 1 },
+      { label: '4', size: 1 },
+      { label: '5', size: 1 },
+      { label: '6', size: 1 },
+      { label: '7', size: 1 },
+      { label: '8', size: 1 },
+      { label: '9', size: 1 },
+      { label: '', size: 1 },
+      { label: '0', size: 1 },
+      { label: '', size: 1 }
+    ];
+
+    var rows = 4;
+    var cols = 3;
+    var buttons = [];
+    var each = function(cb) {
+      var i = 0;
+      for (var r = 0; r < rows; r += 1) {
+        for (var c = 0; c < cols; c += 1) {
+          cb(r, c, i);
+          i += 1;
+        }
+      }
+    };
+    each(function(r, c, i) {
+      var button = document.createElement('button');
+      button.setAttribute('class', 'btn');
+      button.textContent = buttonSettings[i].label;
+      button.style.display = buttonSettings[i].label? '' : 'none';
+      button.addEventListener('click', function(event) {
+        schedule.putDigit(buttonSettings[i].label);
+      });
+      document.body.appendChild(button);
+      buttons.push(button);
+    });
+    buttons.rows = rows;
+    buttons.cols = cols;
+    buttons.each = each;
+    buttons.getButtonSizeAt = function(i) {
+      return buttonSettings[i].size;
+    };
+    return buttons;
+  }();
 
   var schedule = function() {
     var createSelection = function(prop, length) {
@@ -180,6 +235,7 @@ window.addEventListener('load', function() {
         selections.eTime.error = true;
       }
     };
+
     var layout = function(width, height) {
 
       validate();
@@ -202,9 +258,7 @@ window.addEventListener('load', function() {
         ctx.lineTo(0, height);
         ctx.stroke();
         */
-
       }();
-
 
       var std = Math.min(width, height);
       var gap = ~~(std / 50);
@@ -231,10 +285,10 @@ window.addEventListener('load', function() {
       !function() {
 
         var bs = ( (height + gap) / 8 - gap);
-        var marginLeft = (width - ( (bs + gap) * cols - gap) ) / 2;
-        var marginTop = (height - ( (bs + gap) * rows - gap) ) - gap;
+        var marginLeft = (width - ( (bs + gap) * buttons.cols - gap) ) / 2;
+        var marginTop = (height - ( (bs + gap) * buttons.rows - gap) ) - gap;
 
-        eachButtons(function(r, c, i) {
+        buttons.each(function(r, c, i) {
 
           var button = buttons[i];
           var left = marginLeft + c * (bs + gap);
@@ -249,7 +303,8 @@ window.addEventListener('load', function() {
           button.style.width = bs + 'px';
           button.style.height = bs + 'px';
           button.style.borderRadius = (bs / 2) + 'px';
-          button.style.fontSize = (height / 16 * buttonSettings[i].size) + 'px';
+          button.style.fontSize = (height / 16 *
+            buttons.getButtonSizeAt(i) ) + 'px';
         });
       }();
 
@@ -261,10 +316,10 @@ window.addEventListener('load', function() {
         var th = (height + hgap) / 14 - hgap;
         var tw = th / 2;
 
-        var marginLeft = (width - ( (tw + hgap) * tcols - hgap) ) / 2;
-        var marginTop = (btop - ( (th + vgap) * trows - vgap) );
+        var marginLeft = (width - ( (tw + hgap) * texts.cols - hgap) ) / 2;
+        var marginTop = (btop - ( (th + vgap) * texts.rows - vgap) );
 
-        eachTexts(function(r, c, i) {
+        texts.each(function(r, c, i) {
 
           var text = texts[i];
           var left = marginLeft + c * (tw + hgap);
@@ -306,7 +361,7 @@ window.addEventListener('load', function() {
 
       }();
       !function() {
-  
+
         for (var sel in selections) {
           if (selections[sel].error) {
             qrCv.style.display = 'none';
@@ -314,12 +369,12 @@ window.addEventListener('load', function() {
           }
         }
         qrCv.style.display = '';
-  
+
         var vData = '';
         var appendVData = function(line) {
           vData += line + '\r\n';
         };
-  
+
         var now = new Date();
         appendVData('BEGIN:VCALENDAR');
         appendVData('VERSION:2.0');
@@ -336,7 +391,7 @@ window.addEventListener('load', function() {
           (titleTx.value || messages.UNTITLED_SCHEDULE) );
         appendVData('END:VEVENT');
         appendVData('END:VCALENDAR');
-  
+
         var qr = qrcode(0, 'L');
         qr.addData(vData, 'Byte');
         qr.make();
@@ -358,25 +413,24 @@ window.addEventListener('load', function() {
             }
           }
         }
-  
+
         var translate = function(left, top) {
           return 'translate(' + left + 'px,' + top + 'px)';
         };
-  
+
         var left = width / 2;
         var top = gap + titleTx.offsetHeight;
         var scale = (ttop - lbdr - top) / qsize * 0.9;
-  
+
         //hDbgLine(top, 'orange');
         //hDbgLine(ttop - lbdr - lgap, 'blue');
-  
+
         var tran = '';
         tran += translate(-qsize / 2, -qsize / 2);
         tran += 'scale(' + scale + ')';
         tran += translate(qsize / 2, qsize / 2);
         tran += translate(left / scale - qsize / 2,
           (ttop - lbdr - lgap + top) / 2 / scale - qsize / 2);
-  
         qrCv.style.transform = tran;
       }();
     };
@@ -396,57 +450,16 @@ window.addEventListener('load', function() {
         }
         setCurrentSel(focusable[selectedIndex]);
       }
-
     };
 
     return {
-      selections: selections,
       getDisplayString: getDisplayString,
       setCurrentSel: setCurrentSel,
+      nextSel: nextSel,
       putDigit: putDigit,
-      validate: validate,
-      layout: layout,
-      nextSel: nextSel
+      layout: layout
     };
   }();
-
-  var rows = 4;
-  var cols = 3;
-  var buttonSettings = [
-    { label: '1', size: 1 },
-    { label: '2', size: 1 },
-    { label: '3', size: 1 },
-    { label: '4', size: 1 },
-    { label: '5', size: 1 },
-    { label: '6', size: 1 },
-    { label: '7', size: 1 },
-    { label: '8', size: 1 },
-    { label: '9', size: 1 },
-    { label: '', size: 1 },
-    { label: '0', size: 1 },
-    { label: '', size: 1 }
-  ];
-  var buttons = [];
-  var eachButtons = function(cb) {
-    var i = 0;
-    for (var r = 0; r < rows; r += 1) {
-      for (var c = 0; c < cols; c += 1) {
-        cb(r, c, i);
-        i += 1;
-      }
-    }
-  };
-  eachButtons(function(r, c, i) {
-    var button = document.createElement('button');
-    button.setAttribute('class', 'btn');
-    button.textContent = buttonSettings[i].label;
-    button.style.display = buttonSettings[i].label? '' : 'none';
-    button.addEventListener('click', function(event) {
-      schedule.putDigit(buttonSettings[i].label);
-    });
-    document.body.appendChild(button);
-    buttons.push(button);
-  });
 
   document.addEventListener('keydown', function(event) {
     if (event.target != titleTx) {
@@ -476,12 +489,8 @@ window.addEventListener('load', function() {
     ctx.stroke();
   };
 
-  var doLayout = function(width, height) {
-    schedule.layout(width, height);
-  };
-
   var update = function() {
-    doLayout(window.innerWidth, window.innerHeight);
+    schedule.layout(window.innerWidth, window.innerHeight);
   };
 
   var watcher = function() {
@@ -489,7 +498,7 @@ window.addEventListener('load', function() {
     var height =  window.innerHeight;
     if (watcher.lastSize.width != width ||
         watcher.lastSize.height != height) {
-      doLayout(width, height);
+      schedule.layout(width, height);
       watcher.lastSize = { width: width, height: height };
     }
     window.setTimeout(watcher, 500);
