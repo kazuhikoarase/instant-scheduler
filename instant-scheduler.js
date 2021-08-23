@@ -34,11 +34,8 @@ window.addEventListener('load', function() {
     return messages[lang] || messages.en;
   }();
 
-  var keyColor = { r: 211, g: 127, b: 0 };
-  keyColor.rgba = function(a) {
-    return 'rgba(' + keyColor.r + ',' + keyColor.g + ',' +
-      keyColor.b + ',' + a + ')';
-  };
+  var keyColor1 = 'rgba(255,200,100,0.2)';
+  var keyColor2 = 'rgba(127,50,0,0.5)';
 
   qrcode.stringToBytes = qrcode.stringToBytesFuncs['UTF-8'];
 
@@ -256,7 +253,7 @@ window.addEventListener('load', function() {
       ctx.clearRect(0, 0, width, height);
 
       ctx.strokeStyle = '#00f';
-      ctx.fillStyle = keyColor.rgba(0.1);
+      ctx.fillStyle = keyColor1;
       ctx.fillRect(0, 0, width, height);
       /*
       ctx.beginPath();
@@ -375,7 +372,7 @@ window.addEventListener('load', function() {
         elm.style.backgroundColor = error?
           'rgba(255,0,0,0.2)' : 'rgba(0,0,0,0.1)';
         elm.style.border = lbdr + 'px solid ' + (selected?
-          keyColor.rgba(0.3) : 'rgba(0,0,0,0)');
+          keyColor2 : 'rgba(0,0,0,0)');
         elm.style.borderRadius = lbdr * 2 + 'px';
       };
 
