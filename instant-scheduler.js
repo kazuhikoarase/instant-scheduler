@@ -34,8 +34,8 @@ window.addEventListener('load', function() {
     return messages[lang] || messages.en;
   }();
 
-  var keyColor1 = 'rgba(255,200,100,0.2)';
-  var keyColor2 = 'rgba(127,50,0,0.5)';
+  var keyColor1 = 'rgba(255,127,0,0.1)'; // bg
+  var keyColor2 = 'rgba(127,0,0,0.5)';  // border
 
   qrcode.stringToBytes = qrcode.stringToBytesFuncs['UTF-8'];
 
@@ -296,7 +296,7 @@ window.addEventListener('load', function() {
       titleTx.style.padding = tpad + 'px';
       titleTx.style.fontSize = (height / 25) + 'px';
       titleTx.style.width = (width - tpad * 2 - gap * 2) + 'px';
-      titleTx.style.border = tbdr + 'px solid rgba(0,0,0,0.5)';
+      titleTx.style.border = tbdr + 'px solid ' + keyColor2;
       titleTx.style.borderRadius = (height  / 120) + 'px';
     }();
 
