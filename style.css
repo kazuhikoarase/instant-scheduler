@@ -38,20 +38,22 @@ html, body {
 
 .txt {
   position: absolute;
-  display: inline-block;  
+  display: inline-block;
   overflow: visible;
   margin: 0px;
   padding: 0px;
   text-align: center;
   line-height: 1;
+  outline: none;
 }
 
 .sel {
   position: absolute;
-  display: inline-block;  
+  display: inline-block;
   overflow: visible;
   margin: 0px;
   padding: 0px;
+  outline: none;
 }
 
 .btn {

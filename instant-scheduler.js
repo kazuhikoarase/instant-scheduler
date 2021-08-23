@@ -113,9 +113,11 @@ window.addEventListener('load', function() {
     each(function(r, c, i) {
       var button = document.createElement('button');
       button.setAttribute('class', 'btn');
+      button.setAttribute('tabindex', '-1');
       button.textContent = buttonSettings[i].label;
       button.style.display = buttonSettings[i].label? '' : 'none';
       button.addEventListener('mousedown', function(event) {
+        event.preventDefault();
         schedule.putDigit(buttonSettings[i].label);
       });
       document.body.appendChild(button);
@@ -132,23 +134,36 @@ window.addEventListener('load', function() {
 
   var schedule = function() {
 
-    var titleTx = document.createElement('input');
-    titleTx.setAttribute('id', 'titleTx');
-    titleTx.setAttribute('type', 'text');
-    titleTx.setAttribute('placeHolder', messages.ENTER_HERE_YOUR_SCHEDULE);
-    titleTx.addEventListener('input', function() { update(); });
-    document.body.appendChild(titleTx);
-
-    if (location.hash.length > 0) {
-      // restore from hash
-      titleTx.value = decodeURIComponent(location.hash.substring(1) );
-    }
+    var title = function() {
+      var elm = document.createElement('input');
+      elm.setAttribute('id', 'titleTx');
+      elm.setAttribute('type', 'text');
+      elm.setAttribute('placeHolder', messages.ENTER_HERE_YOUR_SCHEDULE);
+      elm.addEventListener('input', function() { update(); });
+      elm.addEventListener('focus', function() {
+        setCurrentSel(sel);
+      } );
+      elm.addEventListener('blur', function() {
+        setCurrentSel(null);
+      } );
+      document.body.appendChild(elm);
+      if (location.hash.length > 0) {
+        // restore from hash
+        elm.value = decodeURIComponent(location.hash.substring(1) );
+      }
+      var sel = { $el: elm };
+      return sel;
+    }();
 
     var createSelection = function(prop, length) {
       var elm = document.createElement('span');
       elm.setAttribute('class', 'sel');
-      elm.addEventListener('mousedown', function() {
+      elm.setAttribute('tabindex', '0');
+      elm.addEventListener('focus', function() {
         setCurrentSel(sel);
+      });
+      elm.addEventListener('blur', function() {
+        setCurrentSel(null);
       });
       document.body.appendChild(elm);
       var sel = { $el: elm, prop: prop, length: length, error: false };
@@ -161,13 +176,6 @@ window.addEventListener('load', function() {
     createSelection('sTime', 4);
     createSelection('eTime', 4);
 
-    var focusable = [
-      selections.year,
-      selections.md,
-      selections.sTime,
-      selections.eTime
-    ];
-
     var date = function() {
       var date = new Date();
       return {
@@ -177,9 +185,7 @@ window.addEventListener('load', function() {
         eTime: '1100'
       };
     }();
-    var model = {
-      currentSel: selections.md
-    };
+    var model = { currentSel: null };
     var getDisplayString = function() {
     return date.year + '/' +
       date.md.substring(0, 2) + '/' + date.md.substring(2, 4) + ' ' +
@@ -190,28 +196,13 @@ window.addEventListener('load', function() {
       model.currentSel = currentSel;
       update();
     };
-    var nextSel = function(prev) {
-      var selectedIndex = -1;
-      focusable.forEach(function(sel, i) {
-        if (model.currentSel == sel) {
-          selectedIndex = i;
-        }
-      });
-      if (selectedIndex != -1) {
-        if (prev) {
-          selectedIndex = (selectedIndex + focusable.length - 1) %
-              focusable.length;
-        } else {
-          selectedIndex = (selectedIndex + 1) % focusable.length;
-        }
-        setCurrentSel(focusable[selectedIndex]);
-      }
-    };
     var putDigit = function(d) {
-      var s = date[model.currentSel.prop] + d;
-      s = s.substring(s.length - model.currentSel.length);
-      date[model.currentSel.prop] = s;
-      update();
+      if (model.currentSel) {
+        var s = date[model.currentSel.prop] + d;
+        s = s.substring(s.length - model.currentSel.length);
+        date[model.currentSel.prop] = s;
+        update();
+      }
     };
     var validate = function() {
       // validation
@@ -284,20 +275,23 @@ window.addEventListener('load', function() {
       var std = Math.min(width, height);
       var gap = ~~(std / 50);
 
-      var tbdr = height / 200;
+      var tbdr = height / 160;
       var tpad = height / 100;
       var lbdr = height / 160;
       var lgap = height / 250;
 
       !function() {
-        location.href = '#' + encodeURIComponent(titleTx.value);
-        titleTx.style.left = (gap - tbdr) + 'px';
-        titleTx.style.top = gap + 'px';
-        titleTx.style.padding = tpad + 'px';
-        titleTx.style.fontSize = (height / 25) + 'px';
-        titleTx.style.width = (width - tpad * 2 - gap * 2) + 'px';
-        titleTx.style.border = tbdr + 'px solid ' + keyColor2;
-        titleTx.style.borderRadius = (height  / 120) + 'px';
+        var selected = model.currentSel == title;
+        var elm = title.$el;
+        location.href = '#' + encodeURIComponent(title.$el.value);
+        elm.style.left = (gap - tbdr) + 'px';
+        elm.style.top = gap + 'px';
+        elm.style.padding = tpad + 'px';
+        elm.style.fontSize = (height / 25) + 'px';
+        elm.style.width = (width - tpad * 2 - gap * 2) + 'px';
+        elm.style.border = tbdr + 'px solid ' +
+          (selected? keyColor2 : 'rgba(0,0,0,0)');
+        elm.style.borderRadius = (height  / 120) + 'px';
       }();
 
       var ttop = 0;
@@ -329,7 +323,7 @@ window.addEventListener('load', function() {
         });
       }();
 
-      var s = schedule.getDisplayString();
+      var s = getDisplayString();
       !function() {
 
         var hgap = 0;
@@ -370,8 +364,8 @@ window.addEventListener('load', function() {
           elm.style.height = (th * height + lgap * 2) + 'px';
           elm.style.backgroundColor = error?
             'rgba(255,0,0,0.2)' : 'rgba(0,0,0,0.1)';
-          elm.style.border = lbdr + 'px solid ' + (selected?
-            keyColor2 : 'rgba(0,0,0,0)');
+          elm.style.border = lbdr + 'px solid ' +
+            (selected? keyColor2 : 'rgba(0,0,0,0)');
           elm.style.borderRadius = lbdr * 2 + 'px';
         };
 
@@ -409,7 +403,7 @@ window.addEventListener('load', function() {
         appendVData('DTEND:' +
           date.year + date.md + 'T' + date.eTime + '00');
         appendVData('SUMMARY:' +
-          (titleTx.value || messages.UNTITLED_SCHEDULE) );
+          (title.$el.value || messages.UNTITLED_SCHEDULE) );
         appendVData('END:VEVENT');
         appendVData('END:VCALENDAR');
 
@@ -441,7 +435,7 @@ window.addEventListener('load', function() {
         };
 
         var left = width / 2;
-        var top = gap + titleTx.offsetHeight;
+        var top = gap + title.$el.offsetHeight;
         var scale = (ttop - lbdr - top) / qsize * 0.9;
 
         //hDbgLine(top, 'orange');
@@ -457,27 +451,26 @@ window.addEventListener('load', function() {
       }();
     };
 
+    document.addEventListener('keydown', function(event) {
+      if (event.target != title.$el && event.key.match(/^[0-9]$/) ) {
+        event.preventDefault();
+        schedule.putDigit(event.key);
+      }
+    });
+
+    var update = function() {
+      layout(window.innerWidth, window.innerHeight);
+    };
+
+    selections.md.$el.focus();
+
     return {
       getDisplayString: getDisplayString,
       setCurrentSel: setCurrentSel,
-      nextSel: nextSel,
       putDigit: putDigit,
       layout: layout
     };
   }();
-
-  document.addEventListener('keydown', function(event) {
-    if (event.target != titleTx) {
-      event.preventDefault();
-    } else {
-      return;
-    }
-    if (event.key.match(/^[0-9]$/) ) {
-      schedule.putDigit(event.key);
-    } else if (event.key == 'Tab') {
-      schedule.nextSel(event.shiftKey);
-    }
-  });
 
   var hDbgLine = function(y, color) {
     ctx.strokeStyle = color || '#f00';
@@ -492,10 +485,6 @@ window.addEventListener('load', function() {
     ctx.moveTo(x, 0);
     ctx.lineTo(x, height / 2);
     ctx.stroke();
-  };
-
-  var update = function() {
-    schedule.layout(window.innerWidth, window.innerHeight);
   };
 
   var watcher = function() {
