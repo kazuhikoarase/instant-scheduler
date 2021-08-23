@@ -127,7 +127,7 @@ window.addEventListener('load', function() {
       button.setAttribute('class', 'btn');
       button.textContent = buttonSettings[i].label;
       button.style.display = buttonSettings[i].label? '' : 'none';
-      button.addEventListener('click', function(event) {
+      button.addEventListener('mousedown', function(event) {
         schedule.putDigit(buttonSettings[i].label);
       });
       document.body.appendChild(button);
@@ -146,7 +146,7 @@ window.addEventListener('load', function() {
     var createSelection = function(prop, length) {
       var elm = document.createElement('span');
       elm.setAttribute('class', 'sel');
-      elm.addEventListener('click', function() {
+      elm.addEventListener('mousedown', function() {
         setCurrentSel(sel);
       });
       document.body.appendChild(elm);
