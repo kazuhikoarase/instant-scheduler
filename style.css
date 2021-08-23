@@ -11,6 +11,12 @@ html, body {
   -webkit-user-select: none;
 }
 
+#bgCv {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+}
+
 #titleTx {
   position: absolute;
   left: 0px;
@@ -28,12 +34,6 @@ html, body {
   margin: 0px;
   padding: 0px;
   image-rendering: pixelated;
-}
-
-#cv {
-  position: absolute;
-  left: 0px;
-  top: 0px;
 }
 
 .txt {

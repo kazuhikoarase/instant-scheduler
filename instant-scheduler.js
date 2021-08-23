@@ -47,13 +47,19 @@ window.addEventListener('load', function() {
     return s;
   };
 
-  var ctx = document.createElement('canvas').getContext('2d');
-  ctx.canvas.setAttribute('id', 'cv');
-  document.body.appendChild(ctx.canvas);
+  var bgCtx = document.createElement('canvas').getContext('2d');
+  bgCtx.canvas.setAttribute('id', 'bgCv');
+  bgCtx.canvas.addEventListener('mousedown', function(event) {
+    event.preventDefault();
+  });
+  document.body.appendChild(bgCtx.canvas);
 
-  var qrCv = document.createElement('canvas');
-  qrCv.setAttribute('id', 'qrCv');
-  document.body.appendChild(qrCv);
+  var qrCtx = document.createElement('canvas').getContext('2d');
+  qrCtx.canvas.setAttribute('id', 'qrCv');
+  qrCtx.canvas.addEventListener('mousedown', function(event) {
+    event.preventDefault();
+  });
+  document.body.appendChild(qrCtx.canvas);
 
   var texts = function() {
     var rows = 2;
@@ -254,26 +260,25 @@ window.addEventListener('load', function() {
 
       !function() {
 
-        ctx.canvas.width = width;
-        ctx.canvas.height = height;
-        ctx.clearRect(0, 0, width, height);
+        bgCtx.canvas.width = width;
+        bgCtx.canvas.height = height;
+        bgCtx.clearRect(0, 0, width, height);
 
-        ctx.strokeStyle = '#00f';
-        ctx.fillStyle = keyColor1;
-        ctx.fillRect(0, 0, width, height);
+        bgCtx.strokeStyle = '#00f';
+        bgCtx.fillStyle = keyColor1;
+        bgCtx.fillRect(0, 0, width, height);
         /*
         // debug-bg
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.lineTo(width, height);
-        ctx.moveTo(width, 0);
-        ctx.lineTo(0, height);
-        ctx.stroke();
+        bgCtx.beginPath();
+        bgCtx.moveTo(0, 0);
+        bgCtx.lineTo(width, height);
+        bgCtx.moveTo(width, 0);
+        bgCtx.lineTo(0, height);
+        bgCtx.stroke();
         */
       }();
 
-      var std = Math.min(width, height);
-      var gap = ~~(std / 50);
+      var gap = height / 50;
 
       var tbdr = height / 160;
       var tpad = height / 100;
@@ -331,7 +336,7 @@ window.addEventListener('load', function() {
       !function() {
 
         var hgap = 0;
-        var vgap = std / 30;
+        var vgap = height / 30;
         var th = (height + hgap) / 14 - hgap;
         var tw = th / 2;
 
@@ -383,11 +388,11 @@ window.addEventListener('load', function() {
 
         for (var sel in selections) {
           if (selections[sel].error) {
-            qrCv.style.display = 'none';
+            qrCtx.canvas.style.display = 'none';
             return;
           }
         }
-        qrCv.style.display = '';
+        qrCtx.canvas.style.display = '';
 
         var vData = '';
         var appendVData = function(line) {
@@ -417,9 +422,8 @@ window.addEventListener('load', function() {
         var msize = 2;
         var quiet = msize * 4;
         var qsize = modCount * msize + quiet * 2;
-        qrCv.width = qsize;
-        qrCv.height = qsize;
-        var qrCtx = qrCv.getContext('2d');
+        qrCtx.canvas.width = qsize;
+        qrCtx.canvas.height = qsize;
         qrCtx.clearRect(0, 0, qrCv.width, qrCv.height);
         qrCtx.fillStyle = '#fff';
         qrCtx.fillRect(0, 0, qrCv.width, qrCv.height);
@@ -476,18 +480,18 @@ window.addEventListener('load', function() {
   }();
 
   var hDbgLine = function(y, color) {
-    ctx.strokeStyle = color || '#f00';
-    ctx.beginPath();
-    ctx.moveTo(0, y);
-    ctx.lineTo(width / 2, y);
-    ctx.stroke();
+    bgCtx.strokeStyle = color || '#f00';
+    bgCtx.beginPath();
+    bgCtx.moveTo(0, y);
+    bgCtx.lineTo(width / 2, y);
+    bgCtx.stroke();
   };
   var vDbgLine = function(x, color) {
-    ctx.strokeStyle = color || '#f00';
-    ctx.beginPath();
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, height / 2);
-    ctx.stroke();
+    bgCtx.strokeStyle = color || '#f00';
+    bgCtx.beginPath();
+    bgCtx.moveTo(x, 0);
+    bgCtx.lineTo(x, height / 2);
+    bgCtx.stroke();
   };
 
   var watcher = function() {
