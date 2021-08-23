@@ -280,10 +280,14 @@ window.addEventListener('load', function() {
       var lbdr = height / 160;
       var lgap = height / 250;
 
+      var titleValue = title.$el.value.replace(/^\s+|\s+$/g,'');
+
       !function() {
         var selected = model.currentSel == title;
         var elm = title.$el;
-        location.href = '#' + encodeURIComponent(title.$el.value);
+        if (titleValue) {
+          location.href = '#' + encodeURIComponent(titleValue);
+        }
         elm.style.left = (gap - tbdr) + 'px';
         elm.style.top = gap + 'px';
         elm.style.padding = tpad + 'px';
@@ -402,8 +406,7 @@ window.addEventListener('load', function() {
           date.year + date.md + 'T' + date.sTime + '00');
         appendVData('DTEND:' +
           date.year + date.md + 'T' + date.eTime + '00');
-        appendVData('SUMMARY:' +
-          (title.$el.value || messages.UNTITLED_SCHEDULE) );
+        appendVData('SUMMARY:' + (titleValue || messages.UNTITLED_SCHEDULE) );
         appendVData('END:VEVENT');
         appendVData('END:VCALENDAR');
 
