@@ -51,18 +51,6 @@ window.addEventListener('load', function() {
   ctx.canvas.setAttribute('id', 'cv');
   document.body.appendChild(ctx.canvas);
 
-  var titleTx = document.createElement('input');
-  titleTx.setAttribute('id', 'titleTx');
-  titleTx.setAttribute('type', 'text');
-  titleTx.setAttribute('placeHolder', messages.ENTER_HERE_YOUR_SCHEDULE);
-  titleTx.addEventListener('input', function() { update(); });
-  document.body.appendChild(titleTx);
-
-  if (location.hash.length > 0) {
-    // restore from hash
-    titleTx.value = decodeURIComponent(location.hash.substring(1) );
-  }
-
   var qrCv = document.createElement('canvas');
   qrCv.setAttribute('id', 'qrCv');
   document.body.appendChild(qrCv);
@@ -143,6 +131,19 @@ window.addEventListener('load', function() {
   }();
 
   var schedule = function() {
+
+    var titleTx = document.createElement('input');
+    titleTx.setAttribute('id', 'titleTx');
+    titleTx.setAttribute('type', 'text');
+    titleTx.setAttribute('placeHolder', messages.ENTER_HERE_YOUR_SCHEDULE);
+    titleTx.addEventListener('input', function() { update(); });
+    document.body.appendChild(titleTx);
+
+    if (location.hash.length > 0) {
+      // restore from hash
+      titleTx.value = decodeURIComponent(location.hash.substring(1) );
+    }
+
     var createSelection = function(prop, length) {
       var elm = document.createElement('span');
       elm.setAttribute('class', 'sel');
@@ -153,17 +154,20 @@ window.addEventListener('load', function() {
       var sel = { $el: elm, prop: prop, length: length, error: false };
       selections[prop] = sel;
     };
+
     var selections = {};
     createSelection('year', 4);
     createSelection('md', 4);
     createSelection('sTime', 4);
     createSelection('eTime', 4);
+
     var focusable = [
       selections.year,
       selections.md,
       selections.sTime,
       selections.eTime
     ];
+
     var date = function() {
       var date = new Date();
       return {
@@ -185,6 +189,23 @@ window.addEventListener('load', function() {
     var setCurrentSel = function(currentSel) {
       model.currentSel = currentSel;
       update();
+    };
+    var nextSel = function(prev) {
+      var selectedIndex = -1;
+      focusable.forEach(function(sel, i) {
+        if (model.currentSel == sel) {
+          selectedIndex = i;
+        }
+      });
+      if (selectedIndex != -1) {
+        if (prev) {
+          selectedIndex = (selectedIndex + focusable.length - 1) %
+              focusable.length;
+        } else {
+          selectedIndex = (selectedIndex + 1) % focusable.length;
+        }
+        setCurrentSel(focusable[selectedIndex]);
+      }
     };
     var putDigit = function(d) {
       var s = date[model.currentSel.prop] + d;
@@ -358,8 +379,8 @@ window.addEventListener('load', function() {
         layoutSelection(selections.md, 5, 0, 5, 1);
         layoutSelection(selections.sTime, 0, 1, 5, 1);
         layoutSelection(selections.eTime, 6, 1, 5, 1);
-
       }();
+
       !function() {
 
         for (var sel in selections) {
@@ -409,7 +430,8 @@ window.addEventListener('load', function() {
         for (var r = 0; r < modCount; r += 1) {
           for (var c = 0; c < modCount; c += 1) {
             if (qr.isDark(r, c) ) {
-              qrCtx.fillRect(c * msize + quiet, r * msize + quiet, msize, msize);
+              qrCtx.fillRect(c * msize + quiet, r * msize + quiet,
+                msize, msize);
             }
           }
         }
@@ -433,23 +455,6 @@ window.addEventListener('load', function() {
           (ttop - lbdr - lgap + top) / 2 / scale - qsize / 2);
         qrCv.style.transform = tran;
       }();
-    };
-    var nextSel = function(prev) {
-      var selectedIndex = -1;
-      focusable.forEach(function(sel, i) {
-        if (model.currentSel == sel) {
-          selectedIndex = i;
-        }
-      });
-      if (selectedIndex != -1) {
-        if (prev) {
-          selectedIndex = (selectedIndex + focusable.length - 1) %
-              focusable.length;
-        } else {
-          selectedIndex = (selectedIndex + 1) % focusable.length;
-        }
-        setCurrentSel(focusable[selectedIndex]);
-      }
     };
 
     return {
