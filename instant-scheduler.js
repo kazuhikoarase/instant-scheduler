@@ -14,10 +14,6 @@
 
 window.addEventListener('load', function() {
 
-  document.addEventListener('touchstart', function(event) {
-    event.preventDefault();
-  });
-
   var messages = function() {
     var messages = {
       en: {
@@ -86,26 +82,45 @@ window.addEventListener('load', function() {
       elm.setAttribute('placeHolder', messages.ENTER_HERE_YOUR_SCHEDULE);
       elm.addEventListener('input', function() { update(); });
       elm.addEventListener('focus', function() {
-        setCurrentSel(sel);
+        setCurrentInput(inp);
       } );
       elm.addEventListener('blur', function() {
-        setCurrentSel(null);
+        setCurrentInput(null);
       } );
       titleHolder.appendChild(elm);
       if (location.hash.length > 0) {
         // restore from hash
         elm.value = decodeURIComponent(location.hash.substring(1) );
       }
-      var sel = { $el: elm };
-      return sel;
+      var inp = { $el: elm };
+      return inp;
     }();
+
+    var qrHolder = document.createElement('div');
+    qrHolder.setAttribute('id', 'qr-holder');
+    qrHolder.addEventListener('mousedown', function(event) {
+      event.preventDefault();
+    });
+    content.appendChild(qrHolder);
 
     var qrCtx = document.createElement('canvas').getContext('2d');
     qrCtx.canvas.setAttribute('id', 'qrcode');
-    qrCtx.canvas.addEventListener('mousedown', function(event) {
-      event.preventDefault();
-    });
-    content.appendChild(qrCtx.canvas);
+    qrHolder.appendChild(qrCtx.canvas);
+
+    var infoCtx = document.createElement('canvas').getContext('2d');
+    infoCtx.canvas.setAttribute('id', 'info');
+    qrHolder.appendChild(infoCtx.canvas);
+
+    !function() {
+      // load sad face.
+      var img = document.createElement('img');
+      img.addEventListener('load', function() {
+        infoCtx.canvas.width = img.width;
+        infoCtx.canvas.height = img.height;
+        infoCtx.drawImage(img, 0, 0);
+      });
+      img.src = 'sad-face.png';
+    }();
 
     var appendLabel = function(text) {
       var elm = document.createElement('span');
@@ -114,36 +129,35 @@ window.addEventListener('load', function() {
       content.appendChild(elm);
     };
 
-    var createSelection = function(prop, length) {
+    var appendInput = function(prop, length) {
       var elm = document.createElement('input');
       elm.value = '1234567';
-      elm.setAttribute('class', 'sel ' + prop);
+      elm.setAttribute('class', 'num-input ' + prop);
       elm.readOnly = true;
       elm.addEventListener('focus', function() {
-        setCurrentSel(sel);
+        setCurrentInput(inp);
       });
       elm.addEventListener('blur', function() {
-        setCurrentSel(null);
+        setCurrentInput(null);
       });
-
-      var sel = { $el: elm, prop: prop, length: length, error: false };
-      selections[prop] = sel;
-      return sel;
+      var inp = { $el: elm, prop: prop, length: length, error: false };
+      inputs[prop] = inp;
+      content.appendChild(elm);
     };
 
     var appendBreak = function(parent) {
       parent.appendChild(document.createElement('br') );
     };
 
-    var selections = {};
+    var inputs = {};
     appendBreak(content);
-    content.appendChild(createSelection('year', 4).$el );
+    appendInput('year', 4);
     appendLabel('/');
-    content.appendChild(createSelection('md', 4).$el );
+    appendInput('md', 4);
     appendBreak(content);
-    content.appendChild(createSelection('sTime', 4).$el );
+    appendInput('sTime', 4);
     appendLabel('-');
-    content.appendChild(createSelection('eTime', 4).$el );
+    appendInput('eTime', 4);
 
     var buttonsHolder = document.createElement('div');
     buttonsHolder.setAttribute('id', 'buttons-holder');
@@ -196,7 +210,7 @@ window.addEventListener('load', function() {
     }();
 
     var model = {
-      currentSel: selections.md,
+      currentInput: inputs.md,
       date: function() {
         var date = new Date();
         return {
@@ -208,16 +222,16 @@ window.addEventListener('load', function() {
       }()
     };
 
-    var setCurrentSel = function(currentSel) {
-      model.currentSel = currentSel;
+    var setCurrentInput = function(currentInput) {
+      model.currentInput = currentInput;
       update();
     };
 
     var putDigit = function(d) {
-      if (model.currentSel) {
-        var s = model.date[model.currentSel.prop] + d;
-        s = s.substring(s.length - model.currentSel.length);
-        model.date[model.currentSel.prop] = s;
+      if (model.currentInput) {
+        var s = model.date[model.currentInput.prop] + d;
+        s = s.substring(s.length - model.currentInput.length);
+        model.date[model.currentInput.prop] = s;
         update();
       }
     };
@@ -238,31 +252,31 @@ window.addEventListener('load', function() {
           lzpad(tmpDate.getMinutes(), 2);
         var error = false;
         if (!error  && sdate.substring(8, 12) != model.date[prop]) {
-          selections[prop].error = true;
+          inputs[prop].error = true;
           error = true;
         }
         if (!error  && sdate.substring(4, 8) != model.date.md) {
-          selections.md.error = true;
+          inputs.md.error = true;
           error = true;
         }
         if (!error  && sdate.substring(0, 4) != model.date.year) {
-          selections.year.error = true;
+          inputs.year.error = true;
           error = true;
         }
         return sdate;
       };
 
       // clear errors.
-      selections.year.error = false;
-      selections.md.error = false;
-      selections.sTime.error = false;
-      selections.eTime.error = false;
+      inputs.year.error = false;
+      inputs.md.error = false;
+      inputs.sTime.error = false;
+      inputs.eTime.error = false;
 
       var sTime = valDate('sTime');
       var dTime = valDate('eTime');
 
       if (dTime < sTime) {
-        selections.eTime.error = true;
+        inputs.eTime.error = true;
       }
     };
 
@@ -305,24 +319,30 @@ window.addEventListener('load', function() {
 
       !function() {
         var elm = title.$el;
-        modClass(elm, 'selected', model.currentSel == title);
+        modClass(elm, 'selected', model.currentInput == title);
+      }();
+
+      var anyError = function() {
+        for (var prop in inputs) {
+          if (inputs[prop].error) {
+            return true;
+          }
+        }
+        return false;
+      }();
+
+      !function() {
+        var canvas = infoCtx.canvas;
+        modClass(canvas, 'error', anyError);
       }();
 
       !function() {
 
         var canvas = qrCtx.canvas;
 
-        modClass(canvas, 'error', false);
-        for (var sel in selections) {
-          if (selections[sel].error) {
-            qrCtx.canvas.width = 1;
-            qrCtx.canvas.height = 1;
-            qrCtx.clearRect(0, 0, canvas.width, canvas.height);
-            qrCtx.fillStyle = '#000';
-            qrCtx.fillRect(0, 0, canvas.width, canvas.height);
-            modClass(canvas, 'error', true);
-            return;
-          }
+        modClass(canvas, 'error', anyError);
+        if (anyError) {
+          return;
         }
 
         var vData = '';
@@ -350,7 +370,6 @@ window.addEventListener('load', function() {
         appendVData('END:VCALENDAR');
 
         var qr = qrcode(0, 'L');
-//        qr.addData(vData, 'Byte');
         qr.addData(vData, 'Byte');
         qr.make();
         var modCount = qr.getModuleCount();
@@ -376,19 +395,19 @@ window.addEventListener('load', function() {
 
       !function() {
 
-        var layoutSelection = function(sel, format) {
-          var elm = sel.$el;
-          modClass(elm, 'selected', model.currentSel == sel);
-          modClass(elm, 'error', sel.error);
-          elm.value = format(model.date[sel.prop]);
+        var layoutInput = function(inp, format) {
+          var elm = inp.$el;
+          modClass(elm, 'selected', model.currentInput == inp);
+          modClass(elm, 'error', inp.error);
+          elm.value = format(model.date[inp.prop]);
         };
 
-        layoutSelection(selections.year, function(v) { return v; });
-        layoutSelection(selections.md, function(v) {
+        layoutInput(inputs.year, function(v) { return v; });
+        layoutInput(inputs.md, function(v) {
           return v.substring(0, 2) + '/' + v.substring(2, 4); });
-        layoutSelection(selections.sTime, function(v) {
+        layoutInput(inputs.sTime, function(v) {
           return v.substring(0, 2) + ':' + v.substring(2, 4); });
-        layoutSelection(selections.eTime, function(v) {
+        layoutInput(inputs.eTime, function(v) {
           return v.substring(0, 2) + ':' + v.substring(2, 4); });
       }();
 
@@ -398,6 +417,10 @@ window.addEventListener('load', function() {
       layout: layout
     };
   }();
+
+  document.addEventListener('touchstart', function(event) {
+    event.preventDefault();
+  });
 
   var watcher = function() {
     var width = window.innerWidth;

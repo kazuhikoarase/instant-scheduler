@@ -43,37 +43,52 @@ INPUT {
   border-radius: 0.2rem;
 }
 
-#qrcode {
+#qr-holder {
+  display: inline-block;
+  position: relative;
   width: 6rem;
+  height: 6rem;
+}
+
+#qrcode {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+	width: 6rem;
   height: 6rem;
   vertical-align: top;
   image-rendering: pixelated;
 }
 
 #qrcode.error {
-  opacity: 0.1;
+  display: none;
 }
 
-.sel {
+#info {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+	width: 6rem;
+  height: 6rem;
+  vertical-align: top;
+  display: none;
+}
+
+#info.error {
+  display: inline-block;
+}
+
+.num-input {
   margin: 0px;
   padding: 0px;
   border: none;
   outline: none;
   text-align: center;
   border-radius: 0.2rem;
+  width: 5.8rem;
 }
 
-.sel.year {
-  width: 5rem;
-}
-
-.sel.md,
-.sel.sTime,
-.sel.eTime {
-  width: 6rem;
-}
-
-.sel.error {
+.num-input.error {
   background-color: rgba(255,0,0,0.2);
 }
 
@@ -82,7 +97,7 @@ INPUT {
   text-align: center;
 }
 
-.sel,
+.num-input,
 .label {
   font-size: 2rem;
   margin: 0.25rem 0.1rem 0rem 0.1rem;
@@ -108,7 +123,7 @@ INPUT {
 }
 
 #title.selected,
-.sel.selected {
+.num-input.selected {
   box-shadow: 0 0 0.2rem 0.08rem rgba(127,0,0,0.8);
   -webkit-appearance: none;
 }
