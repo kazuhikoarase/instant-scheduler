@@ -58,7 +58,6 @@ BODY {
   text-align: center;
   background-color: rgba(0,0,0,0.1);
   border-radius: 0.2rem;
-  -webkit-appearance: none;
 }
 
 .sel.year {
@@ -96,16 +95,18 @@ BODY {
   text-align: center;
   border-style: none;
   outline: none;
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   width: 2.4rem;
   height: 2.4rem;
   border-radius: 1.5rem;
   margin: 0.1rem;
+  padding: 0px;
 }
 
 #title.selected,
 .sel.selected {
-  box-shadow: 0 0 0.2rem 0.2rem rgba(127,0,0,0.5);
+  -webkit-appearance: none;
+	box-shadow: 0 0 0.2rem 0.2rem rgba(127,0,0,0.5);
 }
 
 .num-button:active {
