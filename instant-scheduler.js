@@ -196,7 +196,7 @@ window.addEventListener('load', function() {
     }();
 
     var model = {
-      currentSel: null,
+      currentSel: selections.md,
       date: function() {
         var date = new Date();
         return {
