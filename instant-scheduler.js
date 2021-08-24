@@ -223,7 +223,7 @@ window.addEventListener('load', function() {
     };
 
     var validate = function() {
-      // validation
+
       var valDate = function(prop) {
         var tmpDate = new Date(0);
         tmpDate.setFullYear(+model.date.year);
