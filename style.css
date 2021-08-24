@@ -3,71 +3,110 @@
   font-family: arial, sans-serif;
 }
 
-html, body {
+BODY {
   margin: 0;
   padding: 0;
   overflow: hidden;
   touch-action: none;
   -webkit-user-select: none;
+  background-color: rgba(255,127,0,0.1);
 }
 
-#bgCv {
+#background {
   position: absolute;
   left: 0px;
   top: 0px;
 }
 
-#titleTx {
+#content {
   position: absolute;
   left: 0px;
   top: 0px;
-  margin: 0px;
-  padding: 0px;
-  vertical-align: middle;
+  text-align: center;
+}
+
+#title-holder {
+  padding: 0.5rem 0.5rem 0.25rem 0.5rem;
+}
+
+#title {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.25rem;
+  font-size: 1rem;
+  border: none;
   outline: none;
+  border-radius: 0.2rem;
 }
 
-#qrCv {
-  position: absolute;
-  left: 0px;
-  top: 0px;
-  margin: 0px;
-  padding: 0px;
+#qrcode {
+  width: 6rem;
+  height: 6rem;
+  vertical-align: top;
   image-rendering: pixelated;
 }
 
-.txt {
-  position: absolute;
-  display: inline-block;
-  overflow: visible;
-  margin: 0px;
-  padding: 0px;
-  text-align: center;
-  line-height: 1;
-  outline: none;
+#qrcode.error {
+  opacity: 0.1;
 }
 
 .sel {
-  position: absolute;
-  display: inline-block;
-  overflow: visible;
   margin: 0px;
   padding: 0px;
+  border: none;
   outline: none;
+  text-align: center;
+  background-color: rgba(0,0,0,0.1);
+  border-radius: 0.2rem;
 }
 
-.btn {
-  position: absolute;
+.sel.year {
+  width: 5rem;
+}
+
+.sel.md,
+.sel.sTime,
+.sel.eTime {
+  width: 6rem;
+}
+
+.sel.error {
+  background-color: rgba(255,0,0,0.2);
+}
+
+.label {
+  display: inline-block;
+}
+
+.sel,
+.label {
+  font-size: 2rem;
+  margin-top: 0.25rem;
+}
+
+#buttons-holder {
+  margin-top: 0.25em;
+}
+
+.num-button {
   display: inline-block;
   overflow: visible;
-  margin: 0px;
-  padding: 0px;
   background-color: #fff;
   text-align: center;
   border-style: none;
   outline: none;
+  font-size: 1.5rem;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 1.5rem;
+  margin: 0.1rem;
 }
 
-.btn:active {
-  background-color: #ddd;
+#title.selected,
+.sel.selected {
+  box-shadow: 0 0 0.2rem 0.2rem rgba(127,0,0,0.5);
+}
+
+.num-button:active {
+  background-color: rgba(255,255,255,0.5);
 }
