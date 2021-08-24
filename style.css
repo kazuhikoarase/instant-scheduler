@@ -58,6 +58,7 @@ BODY {
   text-align: center;
   background-color: rgba(0,0,0,0.1);
   border-radius: 0.2rem;
+  -webkit-appearance: none;
 }
 
 .sel.year {
@@ -95,7 +96,7 @@ BODY {
   text-align: center;
   border-style: none;
   outline: none;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   width: 2.4rem;
   height: 2.4rem;
   border-radius: 1.5rem;
