@@ -275,7 +275,7 @@ window.addEventListener('load', function() {
       var sTime = valDate('sTime');
       var dTime = valDate('eTime');
 
-      if (dTime < sTime) {
+      if (!inputs.sTime.error && dTime < sTime) {
         inputs.eTime.error = true;
       }
     };
