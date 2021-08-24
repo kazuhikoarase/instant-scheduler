@@ -273,9 +273,9 @@ window.addEventListener('load', function() {
       inputs.eTime.error = false;
 
       var sTime = valDate('sTime');
-      var dTime = valDate('eTime');
+      var eTime = valDate('eTime');
 
-      if (!inputs.sTime.error && dTime < sTime) {
+      if (!inputs.sTime.error && eTime < sTime) {
         inputs.eTime.error = true;
       }
     };
