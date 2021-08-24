@@ -69,9 +69,7 @@ window.addEventListener('load', function() {
     var content = document.createElement('div');
     content.setAttribute('id', 'content');
     content.addEventListener('mousedown', function(event) {
- //     console.log(event.target);
-      if (event.target.tagName != 'INPUT' &&
-          event.target.tagName != 'BUTTON') {
+      if (event.target.tagName != 'INPUT') {
         event.preventDefault();
       }
     });
@@ -127,6 +125,7 @@ window.addEventListener('load', function() {
       elm.addEventListener('blur', function() {
         setCurrentSel(null);
       });
+
       var sel = { $el: elm, prop: prop, length: length, error: false };
       selections[prop] = sel;
       return sel;
@@ -196,54 +195,57 @@ window.addEventListener('load', function() {
       });
     }();
 
-    var date = function() {
-      var date = new Date();
-      return {
-        year: lzpad(date.getFullYear(), 4),
-        md: lzpad(date.getMonth() + 1, 2) + lzpad(date.getDate(), 2),
-        sTime: '1000',
-        eTime: '1100'
-      };
-    }();
-
-    var model = { currentSel: null };
+    var model = {
+      currentSel: null,
+      date: function() {
+        var date = new Date();
+        return {
+          year: lzpad(date.getFullYear(), 4),
+          md: lzpad(date.getMonth() + 1, 2) + lzpad(date.getDate(), 2),
+          sTime: '1000',
+          eTime: '1100'
+        };
+      }()
+    };
 
     var setCurrentSel = function(currentSel) {
       model.currentSel = currentSel;
       update();
     };
+
     var putDigit = function(d) {
       if (model.currentSel) {
-        var s = date[model.currentSel.prop] + d;
+        var s = model.date[model.currentSel.prop] + d;
         s = s.substring(s.length - model.currentSel.length);
-        date[model.currentSel.prop] = s;
+        model.date[model.currentSel.prop] = s;
         update();
       }
     };
+
     var validate = function() {
       // validation
       var valDate = function(prop) {
         var tmpDate = new Date(0);
-        tmpDate.setFullYear(+date.year);
-        tmpDate.setMonth(+date.md.substring(0, 2) - 1);
-        tmpDate.setDate(+date.md.substring(2, 4) );
-        tmpDate.setHours(+date[prop].substring(0, 2) );
-        tmpDate.setMinutes(+date[prop].substring(2, 4) );
+        tmpDate.setFullYear(+model.date.year);
+        tmpDate.setMonth(+model.date.md.substring(0, 2) - 1);
+        tmpDate.setDate(+model.date.md.substring(2, 4) );
+        tmpDate.setHours(+model.date[prop].substring(0, 2) );
+        tmpDate.setMinutes(+model.date[prop].substring(2, 4) );
         var sdate = lzpad(tmpDate.getFullYear(), 4) +
           lzpad(tmpDate.getMonth() + 1, 2) +
           lzpad(tmpDate.getDate(), 2) +
           lzpad(tmpDate.getHours(), 2) +
           lzpad(tmpDate.getMinutes(), 2);
         var error = false;
-        if (!error  && sdate.substring(8, 12) != date[prop]) {
+        if (!error  && sdate.substring(8, 12) != model.date[prop]) {
           selections[prop].error = true;
           error = true;
         }
-        if (!error  && sdate.substring(4, 8) != date.md) {
+        if (!error  && sdate.substring(4, 8) != model.date.md) {
           selections.md.error = true;
           error = true;
         }
-        if (!error  && sdate.substring(0, 4) != date.year) {
+        if (!error  && sdate.substring(0, 4) != model.date.year) {
           selections.year.error = true;
           error = true;
         }
@@ -277,7 +279,7 @@ window.addEventListener('load', function() {
 
     var layout = function(width, height) {
 
-      // root font size
+      // setup root font size
       document.documentElement.style.fontSize = (height / 25) + 'px';
 
       validate();
@@ -285,7 +287,7 @@ window.addEventListener('load', function() {
       bgCtx.canvas.width = width;
       bgCtx.canvas.height = height;
       bgCtx.clearRect(0, 0, width, height);
-
+/*
       // debug-bg
       bgCtx.strokeStyle = '#00f';
       bgCtx.beginPath();
@@ -294,7 +296,7 @@ window.addEventListener('load', function() {
       bgCtx.moveTo(width, 0);
       bgCtx.lineTo(0, height);
       bgCtx.stroke();
-
+*/
       content.style.width = width + 'px';
       content.style.height = height + 'px';
       var titleValue = title.$el.value.replace(/^\s+|\s+$/g,'');
@@ -309,6 +311,7 @@ window.addEventListener('load', function() {
       }();
 
       !function() {
+
         var canvas = qrCtx.canvas;
 
         modClass(canvas, 'error', false);
@@ -329,6 +332,11 @@ window.addEventListener('load', function() {
           vData += line + '\r\n';
         };
 
+        var vDate = function(timeProp) {
+          return model.date.year + model.date.md + 'T' +
+            model.date[timeProp] + '00';
+        };
+
         var now = new Date();
         appendVData('BEGIN:VCALENDAR');
         appendVData('VERSION:2.0');
@@ -337,10 +345,8 @@ window.addEventListener('load', function() {
           lzpad(now.getFullYear(), 4) +
           lzpad(now.getMonth() + 1, 2) +
           lzpad(now.getDate(), 2) + 'T000000');
-        appendVData('DTSTART:' +
-          date.year + date.md + 'T' + date.sTime + '00');
-        appendVData('DTEND:' +
-          date.year + date.md + 'T' + date.eTime + '00');
+        appendVData('DTSTART:' + vDate('sTime') );
+        appendVData('DTEND:' + vDate('eTime') );
         appendVData('SUMMARY:' + (titleValue || messages.UNTITLED_SCHEDULE) );
         appendVData('END:VEVENT');
         appendVData('END:VCALENDAR');
@@ -376,7 +382,7 @@ window.addEventListener('load', function() {
           var elm = sel.$el;
           modClass(elm, 'selected', model.currentSel == sel);
           modClass(elm, 'error', sel.error);
-          elm.value = format(date[sel.prop]);
+          elm.value = format(model.date[sel.prop]);
         };
 
         layoutSelection(selections.year, function(v) { return v; });
