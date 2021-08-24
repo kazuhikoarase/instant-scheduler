@@ -301,9 +301,7 @@ window.addEventListener('load', function() {
       content.style.height = height + 'px';
       var titleValue = title.$el.value.replace(/^\s+|\s+$/g,'');
 
-      if (titleValue) {
-        location.href = '#' + encodeURIComponent(titleValue);
-      }
+      location.href = '#' + encodeURIComponent(titleValue);
 
       !function() {
         var elm = title.$el;
