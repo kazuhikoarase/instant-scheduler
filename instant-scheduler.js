@@ -79,6 +79,7 @@ window.addEventListener('load', function() {
       var elm = document.createElement('input');
       elm.setAttribute('id', 'title');
       elm.setAttribute('type', 'text');
+      elm.setAttribute('maxlength', '40');
       elm.setAttribute('placeHolder', messages.ENTER_HERE_YOUR_SCHEDULE);
       elm.addEventListener('input', function() { update(); });
       elm.addEventListener('focus', function() {
