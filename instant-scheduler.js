@@ -206,9 +206,6 @@ window.addEventListener('load', function() {
           event.preventDefault();
           putDigit(buttonSettings[i].label);
         });
-        button.addEventListener('mouseup', function(event) {
-          event.preventDefault();
-        });
         buttonsHolder.appendChild(button);
       });
     }();
