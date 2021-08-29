@@ -104,6 +104,25 @@ INPUT {
   margin: 0.25rem 0.1rem 0rem 0.1rem;
 }
 
+.holder {
+  display: inline-block;
+  position: relative;
+}
+
+#day {
+  font-size: 0.5rem;
+  display: inline-block;
+  position: absolute;
+  bottom: 0.1rem;
+  right: 0.15rem;
+  padding: 0.1rem;
+  vertical-align: top;
+  color: rgba(255,255,255,1);
+  background-color: rgba(0,0,0,0.5);
+  border-radius: 0.2rem;
+  transition: all 0.3s;
+}
+
 #buttons-holder {
   margin-top: 0.25rem;
   vertical-align: top;

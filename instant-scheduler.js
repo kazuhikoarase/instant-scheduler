@@ -18,11 +18,13 @@ window.addEventListener('load', function() {
     var messages = {
       en: {
         ENTER_HERE_YOUR_SCHEDULE: 'Enter here your schedule',
-        UNTITLED_SCHEDULE: 'Untitled schedule'
+        UNTITLED_SCHEDULE: 'Untitled schedule',
+        WEEKDAYS: 'SUN,MON,TUE,WED,THU,FRI,SAT'
       },
       ja: {
         ENTER_HERE_YOUR_SCHEDULE: 'ここに予定を入力',
-        UNTITLED_SCHEDULE: '無題の予定'
+        UNTITLED_SCHEDULE: '無題の予定',
+        WEEKDAYS: '日,月,火,水,木,金,土'
       }
     };
     var lang = navigator.language.toLowerCase().
@@ -165,6 +167,22 @@ window.addEventListener('load', function() {
     appendLabel('-');
     appendInput('eTime', 4);
 
+    var day = function() {
+
+      var day = document.createElement('span');
+      day.setAttribute('id', 'day');
+      day.textContent = 'あ';
+
+      var holder = document.createElement('span');
+      holder.setAttribute('class', 'holder');
+      content.insertBefore(holder, inputs.md.$el.nextSibling);
+      content.removeChild(inputs.md.$el);
+      holder.appendChild(inputs.md.$el);
+      holder.appendChild(day);
+
+      return day;
+    }();
+
     var buttonsHolder = document.createElement('div');
     buttonsHolder.setAttribute('id', 'buttons-holder');
     content.appendChild(buttonsHolder);
@@ -257,15 +275,15 @@ window.addEventListener('load', function() {
           lzpad(tmpDate.getHours(), 2) +
           lzpad(tmpDate.getMinutes(), 2);
         var error = false;
-        if (!error  && sdate.substring(8, 12) != model.date[prop]) {
+        if (!error && sdate.substring(8, 12) != model.date[prop]) {
           inputs[prop].error = true;
           error = true;
         }
-        if (!error  && sdate.substring(4, 8) != model.date.md) {
+        if (!error && sdate.substring(4, 8) != model.date.md) {
           inputs.md.error = true;
           error = true;
         }
-        if (!error  && sdate.substring(0, 4) != model.date.year) {
+        if (!error && sdate.substring(0, 4) != model.date.year) {
           inputs.year.error = true;
           error = true;
         }
@@ -326,6 +344,23 @@ window.addEventListener('load', function() {
       !function() {
         var elm = title.$el;
         modClass(elm, 'selected', model.currentInput == title);
+      }();
+
+      !function() {
+        var error = inputs.year.error || inputs.md.error;
+        if (error) {
+          day.textContent = '?';
+        } else {
+          var weekdays = messages.WEEKDAYS.split(/,/g);
+          if (weekdays.length != 7) {
+            throw messages.WEEKDAYS;
+          }
+          var date = new Date(0);
+          date.setFullYear(+model.date.year);
+          date.setMonth(+model.date.md.substring(0, 2) - 1);
+          date.setDate(+model.date.md.substring(2, 4) );
+          day.textContent = weekdays[date.getDay()];
+        }
       }();
 
       var anyError = function() {
