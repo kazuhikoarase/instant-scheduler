@@ -53,18 +53,23 @@ window.addEventListener('load', function() {
     elm.setAttribute('class', values);
   };
 
+  var attachMousedownHandler = function(elm, handler) {
+    elm.addEventListener('mousedown', handler);
+    elm.addEventListener('touchstart', handler);
+  };
+
   var schedule = function() {
 
     var bgCtx = document.createElement('canvas').getContext('2d');
     bgCtx.canvas.setAttribute('id', 'background');
-    bgCtx.canvas.addEventListener('mousedown', function(event) {
+    attachMousedownHandler(bgCtx.canvas, function(event) {
       event.preventDefault();
     });
     document.body.appendChild(bgCtx.canvas);
 
     var content = document.createElement('div');
     content.setAttribute('id', 'content');
-    content.addEventListener('mousedown', function(event) {
+    attachMousedownHandler(content, function(event) {
       if (event.target.tagName != 'INPUT') {
         event.preventDefault();
       }
@@ -99,7 +104,7 @@ window.addEventListener('load', function() {
 
     var qrHolder = document.createElement('div');
     qrHolder.setAttribute('id', 'qr-holder');
-    qrHolder.addEventListener('mousedown', function(event) {
+    attachMousedownHandler(qrHolder, function(event) {
       event.preventDefault();
     });
     content.appendChild(qrHolder);
@@ -202,11 +207,7 @@ window.addEventListener('load', function() {
         button.setAttribute('tabindex', '-1');
         button.textContent = buttonSettings[i].label;
         button.style.display = buttonSettings[i].label? '' : 'none';
-        button.addEventListener('mousedown', function(event) {
-          event.preventDefault();
-          putDigit(buttonSettings[i].label);
-        });
-        button.addEventListener('touchstart', function(event) {
+        attachMousedownHandler(button, function(event) {
           event.preventDefault();
           putDigit(buttonSettings[i].label);
         });
