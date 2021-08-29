@@ -206,6 +206,10 @@ window.addEventListener('load', function() {
           event.preventDefault();
           putDigit(buttonSettings[i].label);
         });
+        button.addEventListener('touchstart', function(event) {
+          event.preventDefault();
+          putDigit(buttonSettings[i].label);
+        });
         buttonsHolder.appendChild(button);
       });
     }();
