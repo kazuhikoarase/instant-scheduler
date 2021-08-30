@@ -113,12 +113,12 @@ INPUT {
   font-size: 0.5rem;
   display: inline-block;
   position: absolute;
-  bottom: 0.1rem;
-  right: 0.15rem;
+  bottom: -0.15rem;
+  right: -0.15rem;
   padding: 0.1rem;
   vertical-align: top;
   color: rgba(255,255,255,1);
-  background-color: rgba(0,0,0,0.5);
+  background-color: rgba(0,0,0,0.8);
   border-radius: 0.2rem;
   transition: all 0.3s;
 }
