@@ -90,7 +90,7 @@ INPUT {
 }
 
 .num-input.error {
-  color: rgba(255,0,0,0.5);
+  color: rgba(255,0,0,0.8);
 }
 
 .label {
