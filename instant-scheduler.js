@@ -348,6 +348,7 @@ window.addEventListener('load', function() {
 
       !function() {
         var error = inputs.year.error || inputs.md.error;
+        modClass(day, 'error', error);
         if (error) {
           day.textContent = '?';
         } else {

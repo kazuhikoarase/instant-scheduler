@@ -118,7 +118,7 @@ INPUT {
   padding: 0.1rem;
   vertical-align: top;
   color: rgba(255,255,255,1);
-  background-color: rgba(0,100,255,1);
+  background-color: rgba(127,127,127,1);
   border-radius: 0.2rem;
   transition: all 0.3s;
 }
@@ -151,6 +151,6 @@ INPUT {
 
 #title.selected,
 .num-input.selected {
-  box-shadow: 0 0 0.2rem 0.08rem rgba(127,0,0,0.8);
+  box-shadow: 0 0 0.2rem 0.08rem rgba(255,63,0,0.8);
   -webkit-appearance: none;
 }
