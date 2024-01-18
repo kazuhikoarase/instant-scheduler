@@ -10,6 +10,8 @@ BODY {
   touch-action: none;
   -webkit-user-select: none;
   background-color: rgba(255,127,0,0.1);
+  background-repeat: repeat;
+  background-image: url(wall.jpg);
 }
 
 INPUT {
