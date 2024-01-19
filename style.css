@@ -175,6 +175,7 @@ INPUT {
 .num-button {
   display: inline-block;
   overflow: visible;
+  color: #000;
   background-color: rgba(0,0,0,0.05);
   text-align: center;
   border-style: none;
