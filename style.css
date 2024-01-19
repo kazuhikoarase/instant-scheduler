@@ -140,6 +140,8 @@ INPUT {
   padding: 0rem;
   background-color: #fff;
   position: absolute;
+  transition: all 0.3s;
+  opacity: 0;
 }
 
 .cal TABLE {

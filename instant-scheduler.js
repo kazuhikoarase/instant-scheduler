@@ -303,9 +303,14 @@ window.addEventListener('load', function() {
         }
 
         var dispose = function() {
-          document.body.removeChild(cal);
+          cal.style.opacity = 0;
+          window.setTimeout(function() {
+            document.body.removeChild(cal);
+          }, 300);
           detachMousedownHandler(document, doc_mousedownHandler);
         };
+
+        cal.style.opacity = 1;
 
         //event.preventDefault();
         event.stopPropagation();
