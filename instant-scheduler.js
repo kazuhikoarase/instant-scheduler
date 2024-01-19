@@ -60,6 +60,11 @@ window.addEventListener('load', function() {
     elm.addEventListener('touchstart', handler);
   };
 
+  var detachMousedownHandler = function(elm, handler) {
+    elm.removeEventListener('mousedown', handler);
+    elm.removeEventListener('touchstart', handler);
+  };
+
   var schedule = function() {
 
     var bgCtx = document.createElement('canvas').getContext('2d');
@@ -137,28 +142,214 @@ window.addEventListener('load', function() {
       content.appendChild(elm);
     };
 
+    var createCalendar = function(selectedDate, date, handler) {
+
+      var weekdays = messages.WEEKDAYS.split(/,/g);
+      if (weekdays.length != 7) {
+        throw messages.WEEKDAYS;
+      }
+
+      var tbody = document.createElement('tbody');
+
+      for (var r = 0; r < 8; r += 1) {
+
+        var tr = document.createElement('tr');
+        tbody.appendChild(tr);
+
+        for (var c = 0; c < 7; c += 1) {
+
+          if (r == 0) {
+            if (c == 0) {
+            } else if (c == 1) {
+            } else if (c == 6) {
+            } else {
+              continue;
+            }
+          }
+
+          var td = document.createElement('td');
+          tr.appendChild(td);
+
+          if (r == 0) {
+            if (c == 0) {
+              td.setAttribute('class', 'cal-title');
+              td.textContent = '<';
+              attachMousedownHandler(td, function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                handler({ type : 'rollmonth', detail : { offset : -1 } });
+              });
+            } else if (c == 1) {
+              td.setAttribute('colspan', 5);
+              td.setAttribute('class', 'cal-title');
+              td.textContent = date.getFullYear() + '/' + (date.getMonth() + 1);
+              attachMousedownHandler(td, function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                handler({ type : 'reset', detail : {} });
+              });
+            } else if (c == 6) {
+              td.setAttribute('class', 'cal-title');
+              td.textContent = '>';
+              attachMousedownHandler(td, function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                handler({ type : 'rollmonth', detail : { offset : 1 } });
+              });
+            }
+          } else if (r == 1) {
+            td.setAttribute('class', 'cal-label');
+            td.textContent = weekdays[c].substring(0, 1);
+          } else {
+            !function(d) {
+              var currentDate = new Date(date.getFullYear(),
+                date.getMonth(), date.getDate() + d);
+              td.setAttribute('class', 'cal-date');
+              if (+currentDate == +selectedDate) {
+                modClass(td, 'cal-selected', true);
+              }
+              td.textContent = '' + currentDate.getDate();
+              attachMousedownHandler(td, function(event) {
+                handler({ type : 'select', detail : {
+                  year : lzpad(currentDate.getFullYear(), 4),
+                  md : lzpad(currentDate.getMonth() + 1, 2) +
+                    lzpad(currentDate.getDate(), 2)
+                } });
+              });
+            }( (r - 2) * 7 + c - date.getDay() );
+          }
+        }
+      }
+
+      var table = document.createElement('table');
+      table.appendChild(tbody);
+      return table;
+    };
+
+    var showCalendar = function(handler) {
+
+      var off = { left : 0, top : 0 };
+      for (var e = calPos; e.offsetParent; e = e.offsetParent) {
+        off.left += e.offsetLeft;
+        off.top += e.offsetTop;
+      }
+
+      var today = function() {
+        var date = new Date();
+        return new Date(date.getFullYear(),
+          date.getMonth(), date.getDate() );
+      };
+
+      var error = inputs.year.error || inputs.md.error;
+      var selectedDate = error? today : new Date(+model.date.year,
+        +model.date.md.substring(0, 2) - 1,
+        +model.date.md.substring(2, 4) );
+      var date = new Date(selectedDate.getFullYear(),
+        selectedDate.getMonth(), 1);
+
+      var updateCalendar = function() {
+        while (cal.firstChild) {
+          cal.removeChild(cal.firstChild);
+        }
+        cal.appendChild(createCalendar(selectedDate, date, function(event) {
+          if (event.type == 'reset') {
+            date = new Date(selectedDate.getFullYear(),
+              selectedDate.getMonth(), 1);
+            updateCalendar();
+          } else if (event.type == 'rollmonth') {
+            date.setMonth(date.getMonth() + event.detail.offset);
+            updateCalendar();
+          }
+          handler(event);
+        }) );
+      };
+
+      var cal = document.createElement('div');
+      cal.setAttribute('class', 'cal');
+      document.body.appendChild(cal);
+      updateCalendar();
+
+      var left = calPos.offsetWidth / 2 - cal.offsetWidth / 2;
+      var top = off.top;
+      cal.style.left = left + 'px';
+      cal.style.top = top + 'px';
+
+      return cal;
+    };
+
+    var setupCalendar = function(elm) {
+
+      attachMousedownHandler(elm, function(event) {
+
+        var cal = showCalendar(function(event) {
+          if (event.type == 'select') {
+            dispose();
+            model.date.year = event.detail.year;
+            model.date.md = event.detail.md;
+            update();
+          }
+        });
+
+        var doc_mousedownHandler = function(event) {
+          for (var elm = event.target;
+              elm.offsetParent; elm = elm.offsetParent) {
+            if (elm == cal) {
+              return;
+            }
+          }
+          dispose();
+        }
+
+        var dispose = function() {
+          document.body.removeChild(cal);
+          detachMousedownHandler(document, doc_mousedownHandler);
+        };
+
+        event.preventDefault();
+        event.stopPropagation();
+        attachMousedownHandler(document, doc_mousedownHandler);
+      });
+    };
+
     var appendInput = function(prop, length) {
+
       var elm = document.createElement('input');
       elm.value = '1234567';
       elm.setAttribute('class', 'num-input ' + prop);
+      elm.setAttribute('ondragstart', 'return false;');
+      elm.setAttribute('ondrop', 'return false;');
       elm.readOnly = true;
+
       elm.addEventListener('focus', function() {
         setCurrentInput(inp);
       });
       elm.addEventListener('blur', function() {
         setCurrentInput(null);
       });
+
+      if (prop == 'year' | prop == 'md') {
+        setupCalendar(elm);
+      }
+
       var inp = { $el: elm, prop: prop, length: length, error: false };
       inputs[prop] = inp;
       content.appendChild(elm);
     };
 
-    var appendBreak = function(parent) {
-      parent.appendChild(document.createElement('br') );
+    var appendBreak = function(parent, className) {
+      var br = document.createElement('br');
+      if (className) {
+        br.setAttribute('class', className);
+      }
+      parent.appendChild(br);
     };
 
+    var calPos = document.createElement('div');
+    calPos.setAttribute('class', 'cal-pos');
+    content.appendChild(calPos);
+
     var inputs = {};
-    appendBreak(content);
+//    appendBreak(content);
     appendInput('year', 4);
     appendLabel('/');
     appendInput('md', 4);
@@ -201,7 +392,7 @@ window.addEventListener('load', function() {
         { label: '9', size: 1 },
         { label: '', size: 1 },
         { label: '0', size: 1 },
-        { label: '', size: 1 }
+        { label: 'C', size: 1 }
       ];
   
       var rows = 4;
@@ -220,35 +411,50 @@ window.addEventListener('load', function() {
         if (i > 0 && c == 0) {
           appendBreak(buttonsHolder);
         }
+        var label = buttonSettings[i].label;
         var button = document.createElement('button');
         button.setAttribute('class', 'num-button');
         button.setAttribute('tabindex', '-1');
-        button.textContent = buttonSettings[i].label;
-        button.style.display = buttonSettings[i].label? '' : 'none';
+        button.textContent = label;
+        button.style.visibility = label? '' : 'hidden';
         attachMousedownHandler(button, function(event) {
           event.preventDefault();
-          putDigit(buttonSettings[i].label);
+          if (label.match(/^[0-9]$/) ) {
+            putDigit(label);
+          } else if (label == 'C') {
+            clearDigits();
+          }
         });
         buttonsHolder.appendChild(button);
       });
     }();
 
+    var getDefaultDate = function() {
+      var date = new Date();
+      return {
+        year: lzpad(date.getFullYear(), 4),
+        md: lzpad(date.getMonth() + 1, 2) + lzpad(date.getDate(), 2),
+        sTime: '0000',
+        eTime: '0000'
+      };
+    };
+
     var model = {
       currentInput: inputs.md,
-      date: function() {
-        var date = new Date();
-        return {
-          year: lzpad(date.getFullYear(), 4),
-          md: lzpad(date.getMonth() + 1, 2) + lzpad(date.getDate(), 2),
-          sTime: '1000',
-          eTime: '1100'
-        };
-      }()
+      date: getDefaultDate()
     };
 
     var setCurrentInput = function(currentInput) {
       model.currentInput = currentInput;
       update();
+    };
+
+    var clearDigits = function() {
+      if (model.currentInput) {
+        model.date[model.currentInput.prop] =
+          getDefaultDate()[model.currentInput.prop];
+        update();
+      }
     };
 
     var putDigit = function(d) {
@@ -305,9 +511,14 @@ window.addEventListener('load', function() {
     };
 
     document.addEventListener('keydown', function(event) {
-      if (event.target != title.$el && event.key.match(/^[0-9]$/) ) {
-        event.preventDefault();
-        putDigit(event.key);
+      if (event.target != title.$el) {
+        if (event.key.match(/^[0-9]$/) ) {
+          event.preventDefault();
+          putDigit(event.key);
+        } else if (event.key.toUpperCase() == 'C') {
+          event.preventDefault();
+          clearDigits();
+        }
       }
     });
 

@@ -130,6 +130,48 @@ INPUT {
   vertical-align: top;
 }
 
+.cal-pos {
+  font-size: 0rem;
+  background-color: red;
+  height: 0.5rem;
+}
+
+.cal {
+  padding: 0rem;
+  background-color: #fff;
+  position: absolute;
+}
+
+.cal TABLE {
+  border-collapse: collapse;
+}
+
+.cal TABLE,
+.cal TABLE TD {
+  border: 0.1rem solid #999;
+}
+
+.cal TABLE TD {
+  padding: 0.2rem;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.cal-title {
+  text-align: center;
+}
+
+.cal-label {
+  text-align: center;
+  background-color: rgba(0,0,0,0.15);
+}
+
+.cal-date {
+  text-align: right;
+}
+.cal-selected {
+  background-color: rgba(0,0,0,0.1);
+}
 .num-button {
   display: inline-block;
   overflow: visible;
@@ -144,6 +186,7 @@ INPUT {
   margin: 0.1rem;
   padding: 0px;
   transition: all 0.3s;
+  vertical-align: top;
 }
 
 .num-button:active {
