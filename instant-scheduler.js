@@ -210,6 +210,8 @@ window.addEventListener('load', function() {
               }
               td.textContent = '' + currentDate.getDate();
               attachMousedownHandler(td, function(event) {
+                event.preventDefault();
+                event.stopPropagation();
                 handler({ type : 'select', detail : {
                   year : lzpad(currentDate.getFullYear(), 4),
                   md : lzpad(currentDate.getMonth() + 1, 2) +
