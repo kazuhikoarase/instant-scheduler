@@ -208,6 +208,10 @@ window.addEventListener('load', function() {
               if (+currentDate == +selectedDate) {
                 modClass(td, 'cal-selected', true);
               }
+              if (!(currentDate.getFullYear() == date.getFullYear() &&
+                  currentDate.getMonth() == date.getMonth() ) ) {
+                modClass(td, 'cal-not-current', true);
+              }
               td.textContent = '' + currentDate.getDate();
               attachMousedownHandler(td, function(event) {
                 event.preventDefault();
