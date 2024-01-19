@@ -307,7 +307,7 @@ window.addEventListener('load', function() {
           detachMousedownHandler(document, doc_mousedownHandler);
         };
 
-        event.preventDefault();
+        //event.preventDefault();
         event.stopPropagation();
         attachMousedownHandler(document, doc_mousedownHandler);
       });
