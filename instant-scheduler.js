@@ -240,7 +240,7 @@ window.addEventListener('load', function() {
         var date = new Date();
         return new Date(date.getFullYear(),
           date.getMonth(), date.getDate() );
-      };
+      }();
 
       var error = inputs.year.error || inputs.md.error;
       var selectedDate = error? today : new Date(+model.date.year,
