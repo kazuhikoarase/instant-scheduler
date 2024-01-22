@@ -122,6 +122,7 @@ window.addEventListener('load', function() {
 
     var infoCtx = document.createElement('canvas').getContext('2d');
     infoCtx.canvas.setAttribute('id', 'info');
+    infoCtx.canvas.style.imageRendering = 'pixelated';
     qrHolder.appendChild(infoCtx.canvas);
 
     !function() {
