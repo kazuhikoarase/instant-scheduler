@@ -9,7 +9,7 @@ BODY {
   overflow: hidden;
   touch-action: none;
   -webkit-user-select: none;
-  background-color: rgba(255,127,0,0.1);
+  background-color: rgba(255,204,102,0.2);
   background-repeat: repeat;
   background-image: url(wall.jpg);
 }
@@ -203,6 +203,6 @@ INPUT {
 
 #title.selected,
 .num-input.selected {
-  box-shadow: 0 0 0.2rem 0.08rem rgba(255,63,0,0.8);
+  box-shadow: 0 0 0.2rem 0.08rem rgba(153,102,0,0.8);
   -webkit-appearance: none;
 }
