@@ -132,7 +132,7 @@ window.addEventListener('load', function() {
         infoCtx.canvas.height = img.height;
         infoCtx.drawImage(img, 0, 0);
       });
-      img.src = 'sad-face.png';
+      img.src = 'not-good.png';
     }();
 
     var appendLabel = function(text) {
@@ -491,18 +491,12 @@ window.addEventListener('load', function() {
           lzpad(tmpDate.getDate(), 2) +
           lzpad(tmpDate.getHours(), 2) +
           lzpad(tmpDate.getMinutes(), 2);
-        var error = false;
-        if (!error && sdate.substring(8, 12) != model.date[prop]) {
+        if (sdate.substring(8, 12) != model.date[prop]) {
           inputs[prop].error = true;
-          error = true;
-        }
-        if (!error && sdate.substring(4, 8) != model.date.md) {
+        } else if (sdate.substring(4, 8) != model.date.md) {
           inputs.md.error = true;
-          error = true;
-        }
-        if (!error && sdate.substring(0, 4) != model.date.year) {
+        } else if (sdate.substring(0, 4) != model.date.year) {
           inputs.year.error = true;
-          error = true;
         }
         return sdate;
       };
